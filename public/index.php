@@ -4,7 +4,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
-require './helpers.php';
 
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
@@ -16,8 +15,8 @@ function hasBodyJson(Request $request) {
     return $comparison;
 }
 
-function setResponse(Response $response, String $description, Integer $status) {
-    $response = $response -> withHeader('Content-type', 'application/json') -> withStatus(status);
+function setResponse(Response $response, String $description, int $status) {
+    $response = $response -> withHeader('Content-type', 'application/json') -> withStatus($status);
     $body = json_encode(array('description' => $description));
 
     $response -> getBody() -> write($body);
@@ -43,14 +42,20 @@ $app -> post('/usuario', function (Request $request, Response $response, $args) 
     if ($comparison) {
         $response = setReponse($response, 'El cuerpo no contiene json', 400);
     } else {
-        $response = setResponse($response, 'Operación para la modificación de los datos del usuario', 400);
+        $response = setResponse($response, 'Operación para la modificación de los datos del usuario', 200);
     }
 
     return $response;
 });
 
 $app -> put('/usuario', function (Request $request, Response $response, $args) {
-    $response -> getBody() -> write('Operación para la creación o reemplazo de los datos del usuario');
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, 'El cuerpo no contiene json', 400);
+    } else {
+        $response = setResponse($response, 'Operación para la creación o reemplazo de los datos del usuario', 200);
+    }
 
     return $response;
 });
@@ -75,31 +80,61 @@ $app-> get('/actividades/{id}', function (Request $request, Response $response, 
 });
 
 $app -> put('/actividades/apuntarse/{id}', function (Request $request, Response $response, $args) {
-    $response = setResponse($response, 'Apuntándose a la actividad ' . $args['id'], 200);
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, 'El cuerpo no contiene json', 400);
+    } else {
+        $response = setResponse($response, 'Apuntándose a la actividad ' . $args['id'], 200);
+    }
 
     return $response;
 });
 
 $app -> post('/actividades', function (Request $request, Response $response, $args) {
-    $response = setResponse($response, 'Modificando los datos relacionados de la actividad introducida', 200);
+    $comparison = hasBodyJson($request);
 
+    if ($comparison) {
+        $response = setReponse($response, 'El cuerpo no contiene json', 400);
+    } else {
+        $response = setResponse($response, 'Modificando los datos relacionados de la actividad introducida', 200);
+    }
+    
     return $response;
 });
 
 $app -> put('/actividades/proponerFechaLocalizacion', function (Request $request, Response $response, $args) {
-    $response = setResponse($response, 'Proponiendo fecha y localización para la actividad', 200);
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, 'El cuerpo no contiene json', 400);
+    } else {
+        $response = setResponse($response, 'Proponiendo fecha y localización para la actividad', 200);
+    }
 
     return $response;
 });
 
 $app -> put('/actividades/confirmarFechaLocalizacion', function (Request $request, Response $response, $args) {
-    $response = setResponse($response, 'Confirmando la asistencia de la fecha de localización', 200);
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, 'El cuerpo no contiene json', 400);
+    } else {
+        $response = setResponse($response, 'Confirmando la asistencia de la fecha de localización', 200);
+    }
 
     return $response;
 });
 
 $app -> put('/actividades/valorar/', function (Request $request, Response $response, $args) {
-    $response = setResponse($response, 'Valorando actividad', 200);
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, 'El cuerpo no contiene json', 400);
+    } else {
+        $response = setResponse($response, 'Valorando actividad', 200);
+    }
 
     return $response;
 });
