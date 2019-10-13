@@ -2,8 +2,8 @@
 	include('actividad.php');
 	class Actividades{
 		//clase que recupera una lista con todas las actividades de la tabla
-		private $actividades=array();
-		private $num_actividades;
+		public $actividades=array();
+		public $num_actividades;
 
 		public function __construct($conexion){	
 			$seleccion = "SELECT * FROM actividad";
@@ -25,10 +25,6 @@
 
 		public function getActividad($index){
 			return $this->actividades[$index];
-		}
-
-		public function getNumActividades(){
-			return $this->num_actividades;
 		}
 	}
 ?>

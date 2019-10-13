@@ -27,9 +27,13 @@
 				echo "Error al registrar: La actividad ya existe.";
 				exit();
 			}
+			else if(is_null($actividad->nombre) or is_null($actividad->fecha) or is_null($actividad->localizacion) or is_null($actividad->descripcion)){
+				echo "Error al registrar actividad: hay campos obligatorios vacíos.";
+				exit();
+			}
 			else{
-				$envio = "INSERT INTO actividades (id_actividad, id_voluntario, id_socio, nombre, fecha, localizacion, descripcion, puntuacion)
-					VALUES ($actividad->id_actividad, $actividad->id_voluntario, $actividad->id_socio, $actividad->nombre, $actividad->fecha,
+				$envio = "INSERT INTO actividades (id_voluntario, id_socio, nombre, fecha, localizacion, descripcion, puntuacion)
+					VALUES ($actividad->id_voluntario, $actividad->id_socio, $actividad->nombre, $actividad->fecha,
 					$actividad->localizacion, $actividad->descripcion, $actividad->puntuacion)";
 				mysqli_query($this->conexion, $envio);
 			}
@@ -43,9 +47,15 @@
 				echo "Error al registrar: El usuario ya existe.";
 				exit();
 			}
+			else if(is_null($usuario->rol) or is_null($usuario->nombre) or is_null($usuario->apellido1) or is_null($usuario->apellido2) or 
+					is_null($usuario->DNI) or is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
+					is_null($usuario->telefono)){
+				echo "Error al registrar usuario: Hay campos obligatorios vacíos.";
+				exit();
+			}
 			else{
-				$envio = "INSERT INTO usuarios (id, rol, nombre, apellido1, apellido2, DNI, fecha_nacimiento, localidad, email, telefono, aspiraciones, observaciones)
-					VALUES ($usuario->id, $usuario->rol, $usuario->nombre, $usuario->apellido1, $usuario->apellido2, $usuario->DNI, $usuario->fecha_nacimiento,
+				$envio = "INSERT INTO usuarios (rol, nombre, apellido1, apellido2, DNI, fecha_nacimiento, localidad, email, telefono, aspiraciones, observaciones)
+					VALUES ($usuario->rol, $usuario->nombre, $usuario->apellido1, $usuario->apellido2, $usuario->DNI, $usuario->fecha_nacimiento,
 					$usuario->localidad, $usuario->email, $usuario->telefono, $usuario->aspiraciones, $usuario->observaciones)";
 				mysqli_query($this->conexion, $envio);
 			}
@@ -57,6 +67,10 @@
 			$resultado=mysqli_query($conexion, $comprobar);
 			if(mysqli_num_rows($resultado)>0){
 				echo "Error al registrar: Gusto ya registrado para ese usuario.";
+				exit();
+			}
+			else if(is_null($gusto)){
+				echo "Error al registrar gusto: Hay campos obligatorios vacíos.";
 				exit();
 			}
 			else{
@@ -72,6 +86,12 @@
 			$resultado=mysqli_query($conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
 				echo "Error al modificar: El usuario no existe.";
+				exit();
+			}
+			else if(is_null($usuario->rol) or is_null($usuario->nombre) or is_null($usuario->apellido1) or is_null($usuario->apellido2) or 
+					is_null($usuario->DNI) or is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
+					is_null($usuario->telefono)){
+				echo "Error al modificar usuario: Hay campos obligatorios vacíos.";
 				exit();
 			}
 			else{
@@ -92,7 +112,10 @@
 				echo "Error al modificar: La actividad no existe.";
 				exit();
 			}
-
+			else if(is_null($actividad->nombre) or is_null($actividad->fecha) or is_null($actividad->localizacion) or is_null($actividad->descripcion)){
+				echo "Error al registrar actividad: hay campos obligatorios vacíos.";
+				exit();
+			}
 			else{
 				$cambio="UPDATE actividad SET id_voluntario=$actividad->id_voluntario, id_socio=$actividad->id_socio, nombre=$actividad->nombre,
 					fecha=$actividad->fecha, localizacion=$actividad->localizacion, descripcion=$actividad->descripcion, puntuacion=$actividad->puntuacion
@@ -135,7 +158,7 @@
 			$comprobar="SELECT * FROM gustos WHERE id_usuario=" . $gusto->id_usuario . " AND gusto=" . $gusto->gusto;
 			$resultado=mysqli_query($conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
-				echo "Error al borrar: El gusto no existe para ese usuario.";
+				echo "Error al borrar: No existe la combinación de gusto y usuario.";
 				exit();
 			}
 			else{

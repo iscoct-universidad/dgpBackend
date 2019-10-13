@@ -2,8 +2,8 @@
 	include('usuario.php');
 	class Usuarios{
 		//clase que recupera una lista con todos los usuarios de la tabla
-		private $usuarios=array();
-		private $num_usuarios;
+		public $usuarios=array();
+		public $num_usuarios;
 
 		public function __construct($conexion){	
 			$seleccion = "SELECT * FROM usuario";
@@ -26,10 +26,6 @@
 
 		public function getUsuario($index){
 			return $this->usuarios[$index];
-		}
-
-		public function getNumUsuarios(){
-			return $this->num_usuarios;
 		}
 	}
 ?>
