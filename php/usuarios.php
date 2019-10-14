@@ -21,7 +21,7 @@
 		}
 
 		public function addUsuario($usuario){
-			$usuarios[]=$usuario;
+			$this->usuarios[]=$usuario;
 		}
 
 		public function getUsuario($index){

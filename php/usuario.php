@@ -13,6 +13,7 @@
 		public $telefono;
 		public $aspiraciones;
 		public $observaciones;
+		public $gustos;
 
 		public function __construct($mail, $conexion){
 			$seleccion = "SELECT * FROM usuarios WHERE email=" . $mail;
@@ -34,8 +35,7 @@
 			$this->password=$fila['password'];
 		}
 
-		public function construct2($id, $rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password){
-			$this->id=$id;
+		public function construct2($rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password,$gustos){
 			$this->rol=$rol;
 			$this->nombre=$nombre;
 			$this->apellido1=$apellido1;
@@ -48,6 +48,7 @@
 			$this->aspiraciones=$aspiraciones;
 			$this->observaciones=$observaciones;
 			$this->password=$password;
+			$this->gustos=$gustos;
 		}
 	}
 ?>

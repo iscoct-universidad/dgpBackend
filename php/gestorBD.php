@@ -6,9 +6,13 @@
 		private $conexion;
 
 		//Fucnión que realiza la conexión con la BD
-		public function __construct($host, $user, $pass, $DB){
-			$conexion = mysqli_connect ($host, $user, $pass, $DB);
-			$conexion->set_charset("utf8");
+		public function __construct(){
+			$host='localhost';
+			$user='dgp_user';
+			$pass='12341234#Sql';
+			$DB='dgp_db';
+			$this->conexion = mysqli_connect ($host, $user, $pass, $DB);
+			$this->conexion->set_charset("utf8");
 			if (mysqli_connect_errno()){
 		    	echo "Conexion a BD fallida";
 		    	exit();
@@ -22,7 +26,7 @@
 		//Añade la actividad '$actividad' a la tabla, si no hay ya una actividad con ese nombre
 		public function regActividad($actividad){
 			$comprobar="SELECT * FROM actividades WHERE nombre=" . $actividad->nombre;
-			$resultado=mysqli_query($conexion, $comprobar);
+			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)>0){
 				echo "Error al registrar: La actividad ya existe.";
 				exit();
@@ -40,31 +44,71 @@
 		}
 
 		//Añade el usuario '$usuario' a la tabla, si no hay ya un usuario con ese email
-		public function regUsuario($usuario){
+		public function regUsuario($usuario,$gustos){
 			$comprobar="SELECT * FROM usuario WHERE email=" . $usuario->email;
 			$resultado=mysqli_query($conexion, $comprobar);
 			if(mysqli_num_rows($resultado)>0){
 				echo "Error al registrar: El usuario ya existe.";
-				exit();
+				return false;
 			}
 			else if(is_null($usuario->rol) or is_null($usuario->nombre) or is_null($usuario->apellido1) or is_null($usuario->apellido2) or 
 					is_null($usuario->DNI) or is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
 					is_null($usuario->telefono) or is_null($usuario->password)){
 				echo "Error al registrar usuario: Hay campos obligatorios vacíos.";
-				exit();
+				return false;
+			}
+			else if (comprobarRolAdministrador($_SESSION['id'])){
+				echo "Error al registrar usuario: El usuario no es administrador.";
+				return false;
+			}
+			else if (!($usuariol->rol=='administrador' or $usuariol->rol=='voluntario' or $usuariol->rol=='socio')){
+				echo "Error al registrar usuario: El rol del usuario no es válido.";
+				return false;				
 			}
 			else{
 				$envio = "INSERT INTO usuarios (rol, nombre, apellido1, apellido2, DNI, fecha_nacimiento, localidad, email, telefono, aspiraciones, observaciones, password)
 					VALUES ($usuario->rol, $usuario->nombre, $usuario->apellido1, $usuario->apellido2, $usuario->DNI, $usuario->fecha_nacimiento,
 					$usuario->localidad, $usuario->email, $usuario->telefono, $usuario->aspiraciones, $usuario->observaciones, $usuario->password)";
 				mysqli_query($this->conexion, $envio);
+				$usuario->id = $this->getIdUsuario($usuario->email);
+				$num_gustos = sizeof($gustos->gustos);
+				for ($i;$i<$num_gustos;$i++)
+					$this->regGusto($usuario,$gustos->getGusto($i));
+				return true;
+			}
+		}
+
+		public function getIdUsuario ($email){
+			$comprobar="SELECT id FROM usuario WHERE email=" . $usuario->email;
+			$resultado=mysqli_query($conexion, $comprobar);
+			$fila_resultado = $resultado_query->fetch_array();
+			return $fila_resultado['id'];
+		}
+
+		public function comprobarRolAdministrador($id){
+			$comprobar="SELECT rol FROM usuario WHERE id=" . $id;
+			$resultado=mysqli_query($conexion, $comprobar);
+			$fila_resultado = $resultado_query->fetch_array();
+			if($fila_resultado['rol'])	return true;
+			else return false;
+		}
+
+		//Función para identificar al usuario
+		public function identificarUsuario ($usuario){
+			$comprobar = "SELECT id FROM usuario WHERE email=" . $usuario->email . " AND password = " . $usuario->password;
+			$resultado=mysqli_query($conexion, $comprobar);
+			if(mysqli_num_rows($resultado)>0){
+				return true;
+			}
+			else{
+				return false;
 			}
 		}
 
 		//Añade el gusto '$gusto' al usuario '$usuario'
 		public function regGusto($usuario, $gusto){
 			$comprobar="SELECT * FROM gustos WHERE id_usuario=" . $usuario->id . " AND gusto=" . $gusto;
-			$resultado=mysqli_query($conexion, $comprobar);
+			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)>0){
 				echo "Error al registrar: Gusto ya registrado para ese usuario.";
 				exit();
@@ -83,7 +127,7 @@
 		//Modifica el usuario '$usuario', buscándolo por su id y cambiando el resto a los valores del objeto
 		public function updateUsuario($usuario){
 			$comprobar="SELECT * FROM usuario WHERE id=" . $usuario->id;
-			$resultado=mysqli_query($conexion, $comprobar);
+			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
 				echo "Error al modificar: El usuario no existe.";
 				exit();
@@ -101,6 +145,14 @@
 					observaciones=$usuario->observaciones, password=$usuario->password WHERE id=$usuario->id";
 				
 				mysqli_query($this->conexion, $cambio);
+				/*
+					Para actualizar los gustos del usuario, lo más rápido es borrar todos y añadir los nuevos.
+				*/
+				deleteAllGustos($usuario->id);
+				$num_gustos = sizeof($gustos->gustos);
+				for ($i;$i<$num_gustos;$i++)
+					$this->regGusto($usuario,$gustos->getGusto($i));
+				return true;
 			}
 		}
 
@@ -129,9 +181,10 @@
 		//Borra el usuario "$usuario", buscándolo por su id
 		public function deleteUsuario($usuario){
 			$comprobar="SELECT * FROM usuario WHERE id=" . $usuario->id;
-			$resultado=mysqli_query($conexion, $comprobar);
+			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
 				echo "Error al borrar: El usuario no existe.";
+				return false;
 				exit();
 			}
 			else{
@@ -143,7 +196,7 @@
 		//Borra la actividad "$actividad", buscándola por su id
 		public function deleteActividad($actividad){
 			$comprobar="SELECT * FROM actividad WHERE id_actividad=" . $actividad->id_actividad;
-			$resultado=mysqli_query($conexion, $comprobar);
+			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
 				echo "Error al borrar: La actividad no existe.";
 				exit();
@@ -157,7 +210,7 @@
 		//Borra el gusto "$gusto", buscándolo por la combinación de usuario y gusto
 		public function deleteGusto($gusto){
 			$comprobar="SELECT * FROM gustos WHERE id_usuario=" . $gusto->id_usuario . " AND gusto=" . $gusto->gusto;
-			$resultado=mysqli_query($conexion, $comprobar);
+			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
 				echo "Error al borrar: No existe la combinación de gusto y usuario.";
 				exit();
@@ -166,6 +219,12 @@
 				$envio = "DELETE FROM gustos WHERE id_usuario=" . $gusto->id_usuario . " AND gusto=" . $gusto->gusto;
 				mysqli_query($this->conexion, $envio);
 			}
+		}
+
+		//Borrar todos los gustos de un usuario.
+		public function deleteAllGustos($id_usuario){
+			$comprobar="DELETE * FROM gustos WHERE id_usuario=" . $id_usuario;
+			$resultado=mysqli_query($this->conexion, $comprobar);
 		}
 	}
 ?>
