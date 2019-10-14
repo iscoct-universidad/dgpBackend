@@ -15,7 +15,7 @@
 				$this->actividades[$i]=new Actividad();
 				$this->actividades[$i]->construct2($fila['id_actividad'], $fila['id_voluntario'],
 					$fila['id_socio'], $fila['nombre'], $fila['fecha'], $fila['localizacion'],
-					$fila['descripcion'], $fila['puntuacion']);
+					$fila['descripcion'], $fila['puntuacion'],$fila['cerrada']);
 			}
 		}
 

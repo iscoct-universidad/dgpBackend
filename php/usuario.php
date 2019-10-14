@@ -9,6 +9,7 @@
 		public $fecha_nacimiento;
 		public $localidad;
 		public $email;
+		public $password;
 		public $telefono;
 		public $aspiraciones;
 		public $observaciones;
@@ -30,9 +31,10 @@
 			$this->telefono=$fila['telefono'];
 			$this->aspiraciones=$fila['aspiraciones'];
 			$this->observaciones=$fila['observaciones'];
+			$this->password=$fila['password'];
 		}
 
-		public function construct2($id, $rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones){
+		public function construct2($id, $rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password){
 			$this->id=$id;
 			$this->rol=$rol;
 			$this->nombre=$nombre;
@@ -45,6 +47,7 @@
 			$this->telefono=$telefono;
 			$this->aspiraciones=$aspiraciones;
 			$this->observaciones=$observaciones;
+			$this->password=$password;
 		}
 	}
 ?>

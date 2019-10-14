@@ -16,7 +16,7 @@
 				$this->usuarios[$i]->construct2($fila['id'], $fila['rol'], $fila['nombre'],
 					$fila['apellido1'], $fila['apellido2'], $fila['DNI'], $fila['fecha_nacimiento'],
 					$fila['localidad'], $fila['email'], $fila['telefono'], $fila['aspiraciones'],
-					$fila['observaciones']);
+					$fila['observaciones'],$fila['password']);
 			}
 		}
 
