@@ -77,8 +77,8 @@
 		}
 
 		public function getIdUsuario ($email){
-			$comprobar="SELECT id FROM usuario WHERE email=" . $email;
-			$resultado=mysqli_query($this->conexion, $comprobar);
+			$comprobar="SELECT id FROM usuario WHERE email='$email'";
+			$resultado=$this->conexion->query($comprobar);
 			$fila_resultado = mysqli_fetch_array($resultado);
 			return $fila_resultado['id'];
 		}
@@ -93,12 +93,9 @@
 
 		//Función para identificar al usuario
 		public function identificarUsuario ($usuario){
-			//$usuario->email=$this->conexion->real_escape_string($usuario->email);
-			//$usuario->password=$this->conexion->real_escape_string($usuario->password);
-			$comprobar = "SELECT * FROM usuario WHERE email=$usuario->email AND password=$usuario->password;";
-			echo $comprobar;
+			$comprobar = "SELECT * FROM usuario WHERE email='$usuario->email' AND password='$usuario->password';";
 			$resultado=$this->conexion->query($comprobar);
-			if($resultado) return true;
+			if($resultado->num_rows) return true;
 			else return false;
 		}
 
