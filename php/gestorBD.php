@@ -1,7 +1,4 @@
 <?php
-	include('actividad.php');
-	include('usuario.php');
-	inlcude('gustos.php');
 	class gestorBD{
 		//Clase para modificar la base de datos
 		private $conexion;
@@ -80,25 +77,25 @@
 		}
 
 		public function getIdUsuario ($email){
-			$comprobar="SELECT id FROM usuario WHERE email=" . $usuario->email;
-			$resultado=mysqli_query($conexion, $comprobar);
-			$fila_resultado = $resultado_query->fetch_array();
+			$comprobar="SELECT id FROM usuario WHERE email=" . $email;
+			$resultado=mysqli_query($this->conexion, $comprobar);
+			$fila_resultado = mysqli_fetch_array($resultado);
 			return $fila_resultado['id'];
 		}
 
 		public function comprobarRolAdministrador($id){
 			$comprobar="SELECT rol FROM usuario WHERE id=" . $id;
 			$resultado=mysqli_query($conexion, $comprobar);
-			$fila_resultado = $resultado_query->fetch_array();
+			$fila_resultado = mysqli_fetch_array($resultado_query);
 			if($fila_resultado['rol'])	return true;
 			else return false;
 		}
 
 		//Función para identificar al usuario
 		public function identificarUsuario ($usuario){
-			$comprobar = "SELECT id FROM usuario WHERE email=" . $usuario->email . " AND password = " . $usuario->password;
-			$resultado=mysqli_query($conexion, $comprobar);
-			if(mysqli_num_rows($resultado)>0) return true;
+			$comprobar = "SELECT * FROM usuario WHERE email='$usuario->email' AND password='$usuario->password'";
+			$resultado=mysqli_query($this->conexion,$comprobar);
+			if($resultado) return true;
 			else return false;
 		}
 

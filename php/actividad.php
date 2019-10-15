@@ -11,7 +11,7 @@
 		public $cerrada;
 		
 
-		public function __construct($id, $conexion){/*
+		/*public function __construct($id, $conexion){
 			$seleccion = "SELECT * FROM actividad WHERE id_actividad=" . $id;
 			$resultado = mysqli_query ($conexion, $seleccion);
 			$fila = mysqli_fetch_assoc ($resultado);
@@ -25,8 +25,7 @@
 			$this->descripcion=$fila['descripcion'];
 			$this->puntuacion=$fila['puntuacion'];
 			$this->cerrada=$fila['cerrada'];
-			*/
-		}
+		}*/
 
 		public function construct2($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion,$cerrada){
 			$this->id_actividad=$id_actividad;

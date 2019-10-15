@@ -4,9 +4,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../php/actividad.php';
+require_once __DIR__ . '/../php/gestorBD.php';
+require_once __DIR__ . '/../php/usuario.php';
 
-$app = AppFactory::create();
-$app->addRoutingMiddleware();
+//$app = AppFactory::create();
+//$app->addRoutingMiddleware();
+$app = new \Slim\App;
 session_start();
 
 function hasBodyJson(Request $request) {
@@ -34,8 +38,9 @@ $app->get('/[health]', function (Request $request, Response $response, $args) {
 $app -> get('/usuario', function (Request $request, Response $response, $args) {
     $conexion_bd= new gestorBD();
     $user = new Usuario;
-    $user->email = $args['email'];
-    $user->password = $args['password'];
+    $data = $request->getParsedBody();
+    $user->email = filter_var($data['email'],FILTER_SANITIZE_STRING);
+    $user->password = filter_var($data['password'],FILTER_SANITIZE_STRING);
 
     $exito = $conexion_bd->identificarUsuario($user);
     if ($exito){
