@@ -98,12 +98,8 @@
 		public function identificarUsuario ($usuario){
 			$comprobar = "SELECT id FROM usuario WHERE email=" . $usuario->email . " AND password = " . $usuario->password;
 			$resultado=mysqli_query($conexion, $comprobar);
-			if(mysqli_num_rows($resultado)>0){
-				return true;
-			}
-			else{
-				return false;
-			}
+			if(mysqli_num_rows($resultado)>0) return true;
+			else return false;
 		}
 
 		//Añade el gusto '$gusto' al usuario '$usuario'

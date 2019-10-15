@@ -103,8 +103,15 @@ $app -> put('/usuario', function (Request $request, Response $response, $args) {
 });
 
 $app -> delete('/usuario/{id}', function (Request $request, Response $response, $args) {
-    $response = setResponse($response, 'Operación para la eliminación de los datos del usuario', 200);
-
+    $conexion_bd= new gestorBD();
+    $usuario = new Usuario;
+    $usuario->id=$args['id'];
+    $exito = $conexion_bd->deleteUsuario($usuario);
+    if ($exito)
+        $response = setResponse($response, 'Operación para la eliminación de los datos del usuario', 200);
+    else
+        $response =setResponse($response, 'El usuario no se puede eliminar porque su id no está registrado', 400);
+    $conexion_bd->close();
     return $response;
 });
 
