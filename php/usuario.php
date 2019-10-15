@@ -13,9 +13,9 @@
 		public $telefono;
 		public $aspiraciones;
 		public $observaciones;
-		public $gustos;
+		public $gustos = array();
 
-		public function __construct($mail, $conexion){
+		public function __construct($mail, $conexion){/*
 			$seleccion = "SELECT * FROM usuarios WHERE email=" . $mail;
 			$resultado = mysqli_query ($conexion, $seleccion);
 			$fila = mysqli_fetch_assoc ($resultado);
@@ -32,7 +32,7 @@
 			$this->telefono=$fila['telefono'];
 			$this->aspiraciones=$fila['aspiraciones'];
 			$this->observaciones=$fila['observaciones'];
-			$this->password=$fila['password'];
+			$this->password=$fila['password'];*/
 		}
 
 		public function construct2($rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password,$gustos){

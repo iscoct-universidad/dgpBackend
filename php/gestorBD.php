@@ -1,6 +1,7 @@
 <?php
 	include('actividad.php');
 	include('usuario.php');
+	inlcude('gustos.php');
 	class gestorBD{
 		//Clase para modificar la base de datos
 		private $conexion;
@@ -44,7 +45,7 @@
 		}
 
 		//Añade el usuario '$usuario' a la tabla, si no hay ya un usuario con ese email
-		public function regUsuario($usuario,$gustos){
+		public function regUsuario($usuario){
 			$comprobar="SELECT * FROM usuario WHERE email=" . $usuario->email;
 			$resultado=mysqli_query($conexion, $comprobar);
 			if(mysqli_num_rows($resultado)>0){
@@ -71,9 +72,9 @@
 					$usuario->localidad, $usuario->email, $usuario->telefono, $usuario->aspiraciones, $usuario->observaciones, $usuario->password)";
 				mysqli_query($this->conexion, $envio);
 				$usuario->id = $this->getIdUsuario($usuario->email);
-				$num_gustos = sizeof($gustos->gustos);
+				$num_gustos = sizeof($usuario->gustos);
 				for ($i;$i<$num_gustos;$i++)
-					$this->regGusto($usuario,$gustos->getGusto($i));
+					$this->regGusto($usuario,$usuario->gustos[$i]);
 				return true;
 			}
 		}
@@ -111,16 +112,16 @@
 			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)>0){
 				echo "Error al registrar: Gusto ya registrado para ese usuario.";
-				exit();
+				return false;
 			}
 			else if(is_null($gusto)){
 				echo "Error al registrar gusto: Hay campos obligatorios vacíos.";
-				exit();
+				return false;
 			}
 			else{
 				$envio = "INSERT INTO gustos (id_usuario, gusto)
 					VALUES ($usuario->id, $gusto)";
-				mysqli_query($this->conexion, $envio);
+				return mysqli_query($this->conexion, $envio);
 			}
 		}
 
@@ -130,13 +131,13 @@
 			$resultado=mysqli_query($this->conexion, $comprobar);
 			if(mysqli_num_rows($resultado)<=0){
 				echo "Error al modificar: El usuario no existe.";
-				exit();
+				return false;
 			}
 			else if(is_null($usuario->rol) or is_null($usuario->nombre) or is_null($usuario->apellido1) or is_null($usuario->apellido2) or 
 					is_null($usuario->DNI) or is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
 					is_null($usuario->telefono) or is_null($usuario->password)){
 				echo "Error al modificar usuario: Hay campos obligatorios vacíos.";
-				exit();
+				return false;
 			}
 			else{
 				$cambio="UPDATE usuario SET rol=$usuario->rol, nombre=$usuario->nombre, apellido1=$usuario->apellido1,
@@ -146,12 +147,13 @@
 				
 				mysqli_query($this->conexion, $cambio);
 				/*
-					Para actualizar los gustos del usuario, lo más rápido es borrar todos y añadir los nuevos.
+					Para actualizar los gustos del usuario, lo más fácil es borrar todos
+					 y añadir los nuevos.
 				*/
-				deleteAllGustos($usuario->id);
-				$num_gustos = sizeof($gustos->gustos);
+				$this->deleteAllGustos($usuario->id);
+				$num_gustos = sizeof($usuario->gustos);
 				for ($i;$i<$num_gustos;$i++)
-					$this->regGusto($usuario,$gustos->getGusto($i));
+					$this->regGusto($usuario,$usuario->gustos[$i]);
 				return true;
 			}
 		}
@@ -189,7 +191,7 @@
 			}
 			else{
 				$envio = "DELETE FROM usuario WHERE id=" . $usuario->id;
-				mysqli_query($this->conexion, $envio);
+				return mysqli_query($this->conexion, $envio);
 			}
 		}
 

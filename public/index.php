@@ -57,15 +57,14 @@ $app -> post('/usuario', function (Request $request, Response $response, $args) 
     } else {
         $conexion_bd= new gestorBD();
 
-        $new_gustos = new Gustos;
+        $new_gustos = array();
         for ($i=0;$i<count($args['gustos']);$i++)
-            $new_gustos->addGusto($args['gustos'][$i]['gusto']);
+            $new_gustos []=$args['gustos'][$i]['gusto'];
 
         $new_user= new Usuario;
         $new_user->construct2($args['rol'],$args['nombre'], $args['apellido1'], $args['apellido2'], $args['DNI'], $args['fecha_nacimiento'], $args['localidad'],
-                             $args['email'], $args['telefono'], $args['aspiraciones'], $args['observaciones'],$args['password']);
-        
-        $exito = $conexion_bd->regUsuario($new_user,$new_gustos);
+                             $args['email'], $args['telefono'], $args['aspiraciones'], $args['observaciones'],$args['password'],$new_gustos);
+        $exito = $conexion_bd->regUsuario($new_user);
         if ($exito)
             $response = setResponse($response, 'OK', 200);
         else
@@ -82,14 +81,18 @@ $app -> put('/usuario', function (Request $request, Response $response, $args) {
         $response = setReponse($response, 'El cuerpo no contiene json', 400);
     } else {
         $conexion_bd= new gestorBD();
+
+        $new_gustos = array();
+        for ($i=0;$i<count($args['gustos']);$i++)
+            $new_gustos []=$args['gustos'][$i]['gusto'];
+
         $new_user= new Usuario;
         $new_user->construct2($args['rol'],$args['nombre'], $args['apellido1'], $args['apellido2'], $args['DNI'], $args['fecha_nacimiento'], $args['localidad'],
                              $args['email'], $args['telefono'], $args['aspiraciones'], $args['observaciones'],$args['password']);
-        $new_gustos = new Gustos;
-        for ($i=0;$i<count($args['gustos']);$i++)
-            $new_gustos->addGusto($args['gustos'][$i]['gusto']);
-        $exito = $conexion_bd->updateUsuario($new_user,$new_gustos);
-        
+        $new_user->id=$_SESSION['id'];
+
+        $exito = $conexion_bd->updateUsuario($new_user);
+
         if ($exito)
             $response = setResponse($response, 'OK', 200);
         else
