@@ -3,10 +3,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-require __DIR__ . '../../vendor/autoload.php';
-require_once __DIR__ . '../../php/actividad.php';
-require_once __DIR__ . '../../php/gestorBD.php';
-require_once __DIR__ . '../../php/usuario.php';
+require __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../php/actividad.php';
+require_once __DIR__ . '/../../php/gestorBD.php';
+require_once __DIR__ . '/../../php/usuario.php';
 
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
@@ -28,13 +28,13 @@ function setResponse(Response $response, String $description, int $status) {
     return $response;
 }
 
-$app->get('/[health]', function (Request $request, Response $response, $args) {
+$app->get('/api/[health]', function (Request $request, Response $response, $args) {
     $response -> getBody() -> write("El servidor está corriendo");
 
     return $response;
 });
 
-$app -> post('/usuario', function (Request $request,Response $response, $args) {
+$app -> post('/api/usuario', function (Request $request,Response $response, $args) {
     $conexion_bd= new gestorBD();
     $user = new Usuario;
     $post = $request->getQueryParams();
@@ -54,7 +54,7 @@ $app -> post('/usuario', function (Request $request,Response $response, $args) {
     return $response;
 });
 
-$app -> post('/usuario/nuevo', function (Request $request, Response $response, $args) {
+$app -> post('/api/usuario/nuevo', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
@@ -79,7 +79,7 @@ $app -> post('/usuario/nuevo', function (Request $request, Response $response, $
     return $response;
 });
 
-$app -> put('/usuario', function (Request $request, Response $response, $args) {
+$app -> put('/api/usuario', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
@@ -107,7 +107,7 @@ $app -> put('/usuario', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-$app -> delete('/usuario/{id}', function (Request $request, Response $response, $args) {
+$app -> delete('/api/usuario/{id}', function (Request $request, Response $response, $args) {
     $conexion_bd= new gestorBD();
     $usuario = new Usuario;
     $usuario->id=$args['id'];
@@ -120,14 +120,14 @@ $app -> delete('/usuario/{id}', function (Request $request, Response $response, 
     return $response;
 });
 
-$app -> get('/actividades', function (Request $request, Response $response, $args) {
+$app -> get('/api/actividades', function (Request $request, Response $response, $args) {
     $response = setResponse($response, 'Operación donde el usuario obtendrá las actividades
         cerradas por él y que no han sido aceptadas.', 200);
 
     return $response;
 });
 
-$app-> get('/actividades/{id}', function (Request $request, Response $response, $args) {
+$app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
     $response = setResponse($response, 'Obteniendo los datos relacionados con la actividad: ' . $args['id'], 200);
 
     return $response;
