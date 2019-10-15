@@ -38,9 +38,11 @@ $app->get('/[health]', function (Request $request, Response $response, $args) {
 $app -> post('/usuario', function (Request $request,Response $response, $args) {
     $conexion_bd= new gestorBD();
     $user = new Usuario;
-    $post = $request->getParsedBody();
+    $post = $request->getQueryParams();
     $user->email = $post['email'];
     $user->password = $post['password'];
+    echo $user->email;
+    echo $user->password;
     $exito = $conexion_bd->identificarUsuario($user);
     if ($exito){
         $response = setResponse($response, 'OK', 200);
@@ -53,7 +55,7 @@ $app -> post('/usuario', function (Request $request,Response $response, $args) {
     return $response;
 });
 
-$app -> post('/usuario', function (Request $request, Response $response, $args) {
+$app -> post('/usuario/nuevo', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
