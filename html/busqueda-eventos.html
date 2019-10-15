@@ -1,0 +1,147 @@
+{% extends "plantillaPadre.html" %}
+
+	{% block content %}
+			{% if SESSION['Usuario'].rol=='gestor' or SESSION['Usuario'].rol=='super' %}
+				<div class="eventos-edicion">
+					<h4>Modificar eventos</h4>
+					{% for evento in Eventos %}
+						<div id="{{ evento.numero }}">
+							<p>{{ evento.fecha }}</p>
+							<div id="titulo-editable-{{ evento.numero }}"><p><b>{{ evento.titulo }}</b></p></div>
+							<div id="contenido-editable-{{ evento.numero }}"><p>{{ evento.texto | raw }}</p></div>
+							<div id="boton-editar-evento-{{ evento.numero }}"><button class="button" onclick="return editarEvento( {{ evento.numero }} )"> Editar Evento</button></div>
+							<p></p>
+							<div id="boton-eliminar-evento-{{ evento.numero }}"><button class="button" onclick="return eliminarEvento( {{ evento.numero }} )"> Eliminar Evento</button></div>
+							<p><b>Imágenes:</b></p>
+							{% for imagen in evento.imagenes %}
+								{% if loop.first %}
+
+										<img class="fotosEvento" src="{{ imagen }}">
+
+								{% else %}
+									<div class="imagen-edicion" id="{{ evento.numero }}-{{ imagen }}">
+										<img class="fotosEvento" src="{{ imagen }}"> <div id="boton-eliminar-imagen-{{ imagen }}"><button class="button" onclick="return eliminarImagen({{ evento.numero }},'{{ imagen }}')"> Eliminar Imagen</button></div>
+									</div>
+								{% endif %}
+							{% endfor %}
+							<form id="formulario_add_imagen" name="formulario_add_imagen-{{ evento.numero }}" onsubmit="return addImagen({{ evento.numero }})" method="post">
+								 <input placeholder="Nueva Imagen" type="text" name="nueva-imagen">
+								<p>
+									<input class="button" type="submit" value="Añadir Imagen" name="Añadir Imagen">
+								</p>
+							</form>
+
+							{% if SESSION['Usuario'].rol=='gestor'%}
+								{% if evento.publicado==1 %}
+										<button class= "button" onclick="publicar({{ evento.numero }},{{ evento.publicado }})">Ocultar publicacion</button>
+									{% else %}
+										<button class= "button" onclick="publicar({{ evento.numero }},{{ evento.publicado }})" >Publicar</button>
+								{% endif %}
+							{% endif %}
+
+							<hr/>
+						</div>
+					{% endfor %}
+
+				</div>
+			{% else %}
+
+				{% for evento in Eventos %}
+				<div class="bloque-columnas">
+					<div class="texto">
+								<div class="titulo_evento">
+												<h3> {{ evento.titulo }} </h3>
+												<h4> Organizadores: Gonzalo y Angel </h4>
+												<h4> Fecha: {{ evento.fecha }} </h4>
+								</div>
+								<p>{{ evento.texto | raw }}</p>
+
+								<div class="fechas_sql">
+									<p>Evento añadido: {{ evento.fecha }}</p>
+									<p>Última modificación: {{ evento.fecha }}</p>
+								</div>
+
+								{% if evento.video %}
+								<video controls class="video">
+										<source src="{{ evento.video }}" type="video/mp4">
+										Your browser does not support the video tag.
+										<!-- esto solo se mostrara si no es compatible con el navegador-->
+								</video>
+									{% endif %}
+
+						</div>
+
+					<div class="fotosEvento" >
+						<a class="prev" onclick="cambioImagen(-1)">&#10094;</a>
+						<a class="next" onclick="cambioImagen(1)">&#10095;</a>
+					{% for imagen in evento.imagenes %}
+						<div class="foto" style="display: none">
+						{% if loop.first %}
+
+								<img src="{{ imagen}}" alt="{{ imagen.alt }}" class="fotosEv1">
+
+						{% else %}
+
+								<img src="{{ imagen }}" alt="{{ imagen.alt }}" class="fotosEv1" >
+
+						{% endif %}
+
+						</div>
+						<script type="text/javascript">
+							cambioImagen(0);
+						</script>
+					{% endfor %}
+
+					{% if SESSION['Identificado'] %}
+					<script type="text/javascript">
+						var nombreTwig={{ SESSION['Usuario'].nombre | json_encode | raw }}
+						var emailTwig={{ SESSION['Usuario'].correo | json_encode | raw }}
+					</script>
+					<div class="botones">
+						<button  class= "button" onclick="ocultar_mostrar()" id="boton_mostrar"> Mostrar panel de comentarios</button>
+					</div>
+					<div class="seccion_comentarios" id="seccion_comentarios" style= "display: none">
+						<div class="comentarios_anteriores" id="comentarios_anteriores">
+							<p><b>Comentarios recientes</b></p>
+							{% for comentario in evento.comentarios %}
+									<div class="comentario" id="{{ comentario.id }}">
+										<hr/>
+											<div  id="texto-editable-{{ comentario.id }}"><p> {{ comentario.texto | raw }}</p></div>
+											<p>({{ comentario.fecha }}) - {{ comentario.hora }} - {{ comentario.nombre }}  </p>
+										{% if SESSION['Usuario'].rol=='moderador' or SESSION['Usuario'].rol=='super' %}
+											<button class= "button"id="boton-editar-comentario-{{ comentario.id }}" onclick="return editarComentario( {{ comentario.id }} )"> Editar Comentario</button>
+											<button class= "button" id="boton-eliminar-comentario-{{ comentario.id }}" onclick="return eliminarComentario( {{ comentario.id }} )"> Eliminar Comentario</button>
+										{% endif %}
+
+
+									</div>
+							{% endfor %}
+						</div>
+						<hr/>
+						<form id="formulario_id" name="formulario_comentarios" onsubmit="return enviar_mensaje()" method="post">
+							<textarea class="texto_comentario" id="textcomentario" name="comentario" onKeyUp="aplicar_filtro()"></textarea>
+							<input class= "button enviar" type="submit" value="Enviar" name="Enviar">
+						</form>
+					</div>
+
+					{% endif %}
+					</div>
+					</div>
+				{% endfor %}
+			{% endif %}
+	{% endblock %}
+
+	{% block footer %}
+		<footer>
+			<div class="texto_copy">
+							<p>© 2019-Gonzangel</p>
+			</div><!--texto copy-->
+
+			<div class="social">
+					<a href="https://www.instagram.com" target="_blank"><img class="botones_sociales" id="botones" src="../images/redes/instagram.png" alt="insta" ></a>
+					<a href="https://www.facebook.com/"><img class="botones_sociales" id="botones" src="../images/redes/facebook.png" alt="facebook" ></a>
+					<a href="https://twitter.com/"><img class="botones_sociales" id="botones" src="../images/redes/twitter.png" alt="twitter" ></a>
+					<a href="{{ evento.href }}" target="_blank"><img class="botones_sociales" id="botones" src="../images/redes/print.png" alt="imprimir" ></a>
+			</div><!--social-->
+		</footer>
+	{% endblock %}

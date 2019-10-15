@@ -1,0 +1,100 @@
+{% extends "plantillaPadre.html" %}
+	{% block content %}
+		{% if SESSION['Identificado'] %}
+		<script type="text/javascript">
+				var emailsRegistradosTwig={{ EmailsRegistrados | json_encode | raw }};
+				var usersRegistradosTwig={{ UsersRegistrados | json_encode | raw }};
+				var nombreTwig={{ SESSION['Usuario'].nombre | json_encode | raw }};
+				var correoTwig={{ SESSION['Usuario'].correo | json_encode | raw }};
+				var passwordTwig={{ SESSION['Usuario'].password | json_encode | raw }};
+		</script>
+
+		<div class="panel">
+				<div class="modificar_datos">
+					<h4>Modificar datos de usuario</h4>
+					<form id="formulario_cambio_datos" name="formulario_cambio_datos" onsubmit="return modificarDatosPersonales()" method="post">
+							<p>Nombre: {{ SESSION['Usuario'].nombre }} </p>
+							<p>Nuevo nombre: <input type="text" name="nuevo-nombre"></p>
+				  			<p>E-mail: {{ SESSION['Usuario'].correo }} </p>
+				  			<p>Nuevo e-mail: <input type="text" name="nuevo-email"></p>
+							<p>Contraseña: <input type="password" name="password"></p>
+							<p>Nueva contraseña: <input type="password" name="nuevo-password"></p>
+							<p>
+								<input class= "button" type="submit" value="Modificar" name="Modificar">
+							</p>
+					</form>
+				</div>
+				<hr/>
+			{% endif %}
+			{% if SESSION['Usuario'].rol=='moderador' or SESSION['Usuario'].rol=='super' %}
+				<div class="comentarios-edicion">
+					<h4>Modificar comentarios</h4>
+					{% for comentario in Comentarios %}
+						<div class="comentario-edicion" id="{{ comentario.id }}">
+							<p>Id : {{ comentario.id }} / Evento: {{ comentario.evento }} / Usuario :{{ comentario.nombre }} / Fecha: {{ comentario.fecha }}  </p>
+							<div id="texto-editable-{{ comentario.id }}"><p> {{ comentario.texto | raw }}</p></div>
+							<button class= "button" id="boton-editar-comentario-{{ comentario.id }}" onclick="return editarComentario( {{ comentario.id }} )"> Editar Comentario</button>
+							<button class= "button" id="boton-eliminar-comentario-{{ comentario.id }}" onclick="return eliminarComentario( {{ comentario.id }} )"> Eliminar Comentario</button>
+
+						</div>
+
+					{% endfor %}
+				</div>
+				<hr/>
+			{% endif %}
+
+			{% if SESSION['Usuario'].rol=='gestor' or SESSION['Usuario'].rol=='super' %}
+
+					<h4>Añadir Evento</h4>
+					<form id="formulario_add_evento" name="formulario_add_evento" onsubmit="return addEvento()" method="post">
+							<p>Nuevo Título: <input type="text" name="nuevo-titulo"></p>
+							<p>Organizador: <input type="text" name="nuevo-organizadores"></p>
+							<p>Nuevo Texto: <input type="text" name="nuevo-texto"></p>
+							<p>
+								<input class= "button" type="submit" value="Añadir Evento" name="Añadir Evento">
+							</p>
+					</form>
+					<hr/>
+
+			{% endif %}
+			{% if SESSION['Usuario'].rol=='super' %}
+				<div class="usuarios-edicion">
+					<h4>Modificar usuarios</h4>
+					{% for usuario in Usuarios %}
+						<p>Nombre: {{ usuario.nombre }} / Correo: {{ usuario.correo}} / tipo: {{ usuario.rol }}</p>
+						<p>Nuevo rol: <select id="nuevo-rol-{{ usuario.nombre }}">
+											<optgroup label="Rol">
+												<option value="registrado">Registrado</option>
+												<option value="moderador">Moderador</option>
+												<option value="gestor">Gestor</option>
+												<option value="super">Super</option>
+											</optgroup>
+										  </select>
+						<button class= "button" id="boton-cambiar-usuario-{{ usuario.nombre }}" onclick="return modificarUsuario( '{{ usuario.nombre }}' )"> Modificar Usuario</button>
+
+					{% endfor %}
+				</div>
+				<hr/>
+			{% endif %}
+			<div class="buscadores">
+				<h4>Buscadores</h4>
+					<form id="buscador-evento" name="buscador-evento" onsubmit="return true" method="post">
+						<div class="bloque-sugerencias">
+						<div class="1"> Buscar <input type="text" id="key" name="busqueda_evento"></div>
+						<div id="suggestions" ></div>
+						</div>
+						<p></p>
+						<button class= "button" onclick="buscar_Evento()">Buscar Evento</button>
+					</form>
+
+
+				{% if SESSION['Usuario'].rol=='moderador' or SESSION['Usuario'].rol=='super' %}
+					<form id="buscador-comentario" name="buscador-comentario" onsubmit="return true" method="post">
+						<p>Buscar <input type="text" id="key" name="busqueda_comentario"></p>
+						<p></p>
+						<button class= "button" onclick="buscar_Comentario()">Buscar Comentario</button>
+					</form>
+				{% endif %}
+			</div>
+			</div>
+	{% endblock %}

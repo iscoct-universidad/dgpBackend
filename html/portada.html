@@ -1,0 +1,21 @@
+{% extends "plantillaPadre.html" %}
+
+
+	{% block content %}
+	<div class="bloque-columnas ">
+		<div class="eventos ">
+		{% for evento in eventos %}
+			<div class="caja_evento">
+
+						<img class="imagen_evento" src={{ evento.imagenes[0].fuente }} />
+            <div class="nombre_evento">
+                <a href="{{ evento.href }}"> {{ evento.titulo }}</a>
+            </div>
+            <div class="des_evento">
+                <p> En taquilla desde 16€ <br /><br /> Fecha: {{ evento.fecha }}</p>
+            </div>
+        </div>
+		{% endfor %}
+		</div>
+		</div>
+	{% endblock %}

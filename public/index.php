@@ -3,10 +3,19 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
+require_once '../Twig/Autoloader.php';
+Twig_Autoloader::register();
+$loader = new Twig_Loader_Filesystem('../html');
+$twig = new Twig_Environment($loader);
+
 require __DIR__ . '/../vendor/autoload.php';
 
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
+
+echo $twig->render('plantillaPadre.html'); // vale funciona
+
+
 
 function hasBodyJson(Request $request) {
     $contentType = $request -> getHeaderLine('Content-Type');
@@ -26,8 +35,10 @@ function setResponse(Response $response, String $description, int $status) {
 
 $app->get('/[health]', function (Request $request, Response $response, $args) {
     $response -> getBody() -> write("El servidor está corriendo");
+    
 
     return $response;
+    
 });
 
 $app -> get('/usuario', function (Request $request, Response $response, $args) {

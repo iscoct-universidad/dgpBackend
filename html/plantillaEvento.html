@@ -1,0 +1,112 @@
+{% extends "plantillaPadre.html" %}
+{% block head %}
+	<meta charset="UTF-8">
+	<title>Conciertos Coperos </title>
+	<!--CSS-->
+	<link rel="stylesheet" href="./css/estilo.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/funciones.js"></script>
+
+	{% block js %}
+		<script type="text/javascript">
+			var prohibidasTwig={{ Prohibidas | json_encode | raw }};
+			var tituloVentana={{ evento.titulo| json_encode | raw }};
+			var imagenVentana={{ evento.imagenes[0].fuente | json_encode | raw }};
+			var numeroEvento={{ evento.numero | json_encode | raw }};
+			var IPCliente;
+
+		</script>
+	{% endblock %}
+
+{% endblock %}
+
+
+{% block content %}
+<div class="bloque-columnas">
+<div class="texto">
+				<div class="titulo_evento">
+								<h3> {{ evento.titulo }} </h3>
+								<h4> Organizadores: {{ evento.organizadores }}</h4>
+								<h4> Fecha: {{ evento.fecha }} </h4>
+				</div>
+				<p>{{ evento.texto | raw }}</p>
+
+				<div class="fechas_sql">
+					<p>Evento añadido: {{ evento.fecha_insercion }}</p>
+					<p>Última modificación: {{ evento.fecha_modificacion }}</p>
+				</div>
+
+				{% if evento.video %}
+				<video controls class="video">
+						<source src="{{ evento.video }}" type="video/mp4">
+						Your browser does not support the video tag.
+						<!-- esto solo se mostrara si no es compatible con el navegador-->
+				</video>
+					{% endif %}
+
+
+					{% if SESSION['Usuario'].rol=='gestor' or SESSION['Usuario'].rol=='super' %}
+						<form id="buscador-evento" name="busqueda_evento" onsubmit="return true" method="post">
+							<button class= "button" type="submit" name="busqueda_evento" value="{{ evento.titulo }}" formmethod="post">editarEvento</button>
+						</form>
+					{% endif %}
+		</div>
+
+	<div class="fotosEvento" >
+		<a class="prev" onclick="cambioImagen(-1)">&#10094;</a>
+		<a class="next" onclick="cambioImagen(1)">&#10095;</a>
+	{% for imagen in evento.imagenes %}
+		<div class="foto" style="display: none">
+		{% if loop.first %}
+
+				<img src="{{ imagen.fuente }}" alt="{{ imagen.alt }}" class="fotosEv1">
+
+		{% else %}
+
+				<img src="{{ imagen.fuente }}" alt="{{ imagen.alt }}" class="fotosEv1" >
+
+		{% endif %}
+
+		</div>
+		<script type="text/javascript">
+			cambioImagen(0);
+		</script>
+	{% endfor %}
+
+	{% if SESSION['Identificado'] %}
+	<script type="text/javascript">
+		var nombreTwig={{ SESSION['Usuario'].nombre | json_encode | raw }}
+		var emailTwig={{ SESSION['Usuario'].correo | json_encode | raw }}
+	</script>
+	<div class="botones">
+		<button  class= "button" onclick="ocultar_mostrar()" id="boton_mostrar"> Mostrar panel de comentarios</button>
+	</div>
+	<div class="seccion_comentarios" id="seccion_comentarios" style= "display: none">
+		<div class="comentarios_anteriores" id="comentarios_anteriores">
+			<p><b>Comentarios recientes</b></p>
+			{% for comentario in evento.comentarios %}
+			  	<div class="comentario" id="{{ comentario.id }}">
+						<hr/>
+				  		<div  id="texto-editable-{{ comentario.id }}"><p> {{ comentario.texto | raw }}</p></div>
+							<p>({{ comentario.fecha }}) - {{ comentario.hora }} - {{ comentario.nombre }}  </p>
+						{% if SESSION['Usuario'].rol=='moderador' or SESSION['Usuario'].rol=='super' %}
+							<button class= "button"id="boton-editar-comentario-{{ comentario.id }}" onclick="return editarComentario( {{ comentario.id }} )"> Editar Comentario</button>
+							<button class= "button" id="boton-eliminar-comentario-{{ comentario.id }}" onclick="return eliminarComentario( {{ comentario.id }} )"> Eliminar Comentario</button>
+						{% endif %}
+
+
+			  	</div>
+			{% endfor %}
+		</div>
+		<hr/>
+		<form id="formulario_id" name="formulario_comentarios" onsubmit="return enviar_mensaje()" method="post">
+			<textarea class="texto_comentario" id="textcomentario" name="comentario" onKeyUp="aplicar_filtro()"></textarea>
+			<input class= "button enviar" type="submit" value="Enviar" name="Enviar">
+		</form>
+	</div>
+
+	{% endif %}
+	</div>
+	</div>
+
+{% endblock %}

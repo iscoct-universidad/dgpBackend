@@ -1,0 +1,31 @@
+{% extends "plantillaPadre.html" %}
+{% block head %}
+	<meta charset="UTF-8">
+	<title>Conciertos Coperos </title>
+	<!--CSS-->
+	<link rel="stylesheet" href="./css/estilo.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/funciones.js"></script>
+
+	{% block js %}
+		<script type="text/javascript">
+			var emailsRegistradosTwig={{ EmailsRegistrados | json_encode | raw }};
+			var usersRegistradosTwig={{ UsersRegistrados | json_encode | raw }};
+		</script>
+	{% endblock %}
+
+{% endblock %}
+
+
+
+	{% block content %}
+		<div class="panel">
+			<h4>Registro</h4>
+			<form id="formulario_registro" name="formulario_registro" action="./" onsubmit="return registrarse()" method="post">
+					<p><input type="text" placeholder="Nombre" name="nombre"/></p>
+		  		<p><input type="text" placeholder="Email" name="email"/></p>
+	        <p><input type="password" placeholder="Contraseña" name="password"/></p>
+					<p><input class="button" type="submit" value="Registro" name="Registro"></p>
+			</form>
+	</div>
+	{% endblock %}

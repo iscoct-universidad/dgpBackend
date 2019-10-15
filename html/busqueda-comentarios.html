@@ -1,0 +1,19 @@
+{% extends "plantillaPadre.html" %}
+
+	{% block content %}
+		{% if SESSION['Usuario'].rol=='moderador' or SESSION['Usuario'].rol=='super' %}
+				<div class="panel">
+					<h4>Comentarios encontrados:</h4>
+					{% for comentario in Comentarios %}
+						<div class="comentario-edicion" id="{{ comentario.id }}">
+							<p>Id: {{ comentario.id }}, Evento: {{ comentario.evento }}, Usuario: {{ comentario.nombre }}, Correo: {{ comentario.correo }}, Fecha: {{ comentario.fecha }}, IP: {{ comentario.ip }} </p>
+							<div id="texto-editable-{{ comentario.id }}"><p> {{ comentario.texto | raw }}</p></div>
+							<button class="button" id="boton-editar-comentario-{{ comentario.id }}" onclick="return editarComentario( {{ comentario.id }} )"> Editar Comentario</button>
+							<button class="button" id="boton-eliminar-comentario-{{ comentario.id }}" onclick="return eliminarComentario( {{ comentario.id }} )"> Eliminar Comentario</button>
+							<hr/>
+						</div>
+
+					{% endfor %}
+				</div>
+			{% endif %}
+	{% endblock %}

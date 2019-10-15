@@ -1,0 +1,19 @@
+{% extends "plantillaEvento.html" %}
+{% block sidebar %}
+{% endblock %}
+
+{% block content %}
+	<!--Evento concreto-->
+	<div class="imprimir">
+		<h3> {{ evento.titulo }} </h3>
+		<img  class="fotosEv1" src="{{ evento.imagenes[0].fuente }}" >
+		<h4> Organizadores: {{ evento.organizadores }}</h4>
+		<h4> Fecha: {{ evento.fecha }} </h4>
+		<!--Parrafos con el contenido del evento-->
+		<p>{{ evento.texto | raw }}</p>
+
+	</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
