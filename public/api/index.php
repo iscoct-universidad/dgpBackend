@@ -133,7 +133,7 @@ $app-> get('/api/actividades/{id}', function (Request $request, Response $respon
     return $response;
 });
 
-$app -> put('/actividades/apuntarse/{id}', function (Request $request, Response $response, $args) {
+$app -> put('/api/actividades/apuntarse/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
@@ -145,7 +145,7 @@ $app -> put('/actividades/apuntarse/{id}', function (Request $request, Response 
     return $response;
 });
 
-$app -> post('/actividades', function (Request $request, Response $response, $args) {
+$app -> post('/api/actividades', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
@@ -157,7 +157,7 @@ $app -> post('/actividades', function (Request $request, Response $response, $ar
     return $response;
 });
 
-$app -> put('/actividades/proponerFechaLocalizacion', function (Request $request, Response $response, $args) {
+$app -> put('/api/actividades/proponerFechaLocalizacion', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
@@ -169,7 +169,7 @@ $app -> put('/actividades/proponerFechaLocalizacion', function (Request $request
     return $response;
 });
 
-$app -> put('/actividades/confirmarFechaLocalizacion', function (Request $request, Response $response, $args) {
+$app -> put('/api/actividades/confirmarFechaLocalizacion', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
@@ -181,7 +181,7 @@ $app -> put('/actividades/confirmarFechaLocalizacion', function (Request $reques
     return $response;
 });
 
-$app -> put('/actividades/valorar/', function (Request $request, Response $response, $args) {
+$app -> put('/api/actividades/valorar/', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
     if ($comparison) {
