@@ -1,10 +1,12 @@
 {
     "require": {
-        "slim/slim": "^3.12",
+        "slim/slim": "4.0.0",
         "nyholm/psr7": "^1.2",
         "nyholm/psr7-server": "^0.3.0",
         "guzzlehttp/psr7": "^1.6",
         "http-interop/http-factory-guzzle": "^1.0",
-        "zendframework/zend-diactoros": "^2.1"
+        "zendframework/zend-diactoros": "^2.1",
+        "slim/twig-view": "^2.5",
+        "slim/psr7": "^0.6.0"
     }
 }
