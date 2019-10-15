@@ -9,9 +9,9 @@
 			$user='dgp_user';
 			$pass='12341234#Sql';
 			$DB='dgp_db';
-			$this->conexion = mysqli_connect ($host, $user, $pass, $DB);
+			$this->conexion = new mysqli ($host, $user, $pass, $DB);
 			$this->conexion->set_charset("utf8");
-			if (mysqli_connect_errno()){
+			if ($this->conexion->connect_error){
 		    	echo "Conexion a BD fallida";
 		    	exit();
 			}
@@ -93,8 +93,11 @@
 
 		//Función para identificar al usuario
 		public function identificarUsuario ($usuario){
-			$comprobar = "SELECT * FROM usuario WHERE email='$usuario->email' AND password='$usuario->password'";
-			$resultado=mysqli_query($this->conexion,$comprobar);
+			//$usuario->email=$this->conexion->real_escape_string($usuario->email);
+			//$usuario->password=$this->conexion->real_escape_string($usuario->password);
+			$comprobar = "SELECT * FROM usuario WHERE email=$usuario->email AND password=$usuario->password;";
+			echo $comprobar;
+			$resultado=$this->conexion->query($comprobar);
 			if($resultado) return true;
 			else return false;
 		}

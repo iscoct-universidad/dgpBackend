@@ -35,13 +35,13 @@ $app->get('/[health]', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-$app -> get('/usuario', function (Request $request, Response $response, $args) {
+$app -> get('/usuario', function ($request, $response, $args) {
     $conexion_bd= new gestorBD();
     $user = new Usuario;
-    $data = $request->getParsedBody();
-    $user->email = filter_var($data['email'],FILTER_SANITIZE_STRING);
-    $user->password = filter_var($data['password'],FILTER_SANITIZE_STRING);
-
+    $user->email = $request->get('email');
+    $user->password = $request()->get('password');
+    echo $user->email;
+    echo $user->password;
     $exito = $conexion_bd->identificarUsuario($user);
     if ($exito){
         $response = setResponse($response, 'OK', 200);
