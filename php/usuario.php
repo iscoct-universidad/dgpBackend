@@ -41,7 +41,7 @@
 			$this->apellido1=$apellido1;
 			$this->apellido2=$apellido2;
 			$this->DNI=$DNI;
-			$this->fecha_nacimiento=$fecha_nacimiento;
+			$this->fecha_nacimiento=date($fecha_nacimiento);
 			$this->localidad=$localidad;
 			$this->email=$email;
 			$this->telefono=$telefono;
