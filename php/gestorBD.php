@@ -251,6 +251,62 @@
 				return ($consulta->affected_rows==1);
 			}	
 		}
+		//Confirmar fecha y localizacion
+		public function confirmarFechaLocalizacion($actividad){
+			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
+			$consulta->bind_param("i",$_SESSION['id_usuario']);
+			$consulta->execute();
+			$fila_resultado = $consulta->get_result()->fetch_assoc();
+			if ($fila_resultado['rol']=='socio'){
+				$actividad->id_socio=$_SESSION['id_usuario'];
+				if ($actividad->cerrada){
+					$consulta=$this->conexion->prepare("UPDATE actividad SET cerrada=? WHERE id_actividad=? AND id_socio=?;");
+					$consulta->bind_param("iii",$actividad->cerrada,$actividad->id_actividad,$actividad->id_socio);
+					$consulta->execute();
+				}
+				else{
+					$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=NULL, localizacion=NULL WHERE id_actividad=? AND id_socio=?;");
+					$consulta->bind_param("ii",$actividad->id_actividad,$actividad->id_socio);
+					$consulta->execute();
+				}
+				return ($consulta->affected_rows==1);
+			}
+			else{
+				$actividad->id_voluntario=$_SESSION['id_usuario'];
+				if ($actividad->cerrada){
+					$consulta=$this->conexion->prepare("UPDATE actividad SET cerrada=? WHERE id_actividad=? AND id_voluntario=?;");
+					$consulta->bind_param("iii",$actividad->cerrada,$actividad->id_actividad,$actividad->id_voluntario);
+					$consulta->execute();
+				}
+				else{
+					$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=NULL,localizacion=NULL WHERE id_actividad=? AND id_voluntario=?;");
+					$consulta->bind_param("ii",$actividad->id_actividad,$actividad->id_voluntario);
+					$consulta->execute();
+				}
+				return ($consulta->affected_rows==1);
+			}	
+		}
+
+		public function valorar($actividad){
+			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
+			$consulta->bind_param("i",$_SESSION['id_usuario']);
+			$consulta->execute();
+			$fila_resultado = $consulta->get_result()->fetch_assoc();
+			if ($fila_resultado['rol']=='socio'){
+				$actividad->id_socio=$_SESSION['id_usuario'];
+				$consulta=$this->conexion->prepare("UPDATE actividad SET puntuacion=? WHERE id_actividad=? AND id_socio=? AND cerrada=1");
+				$consulta->bind_param("iii",$actividad->puntuacion,$actividad->id_actividad,$actividad->id_socio);
+				$consulta->execute();
+				return ($consulta->affected_rows==1);
+			}
+			else{
+				$actividad->id_voluntario=$_SESSION['id_usuario'];
+				$consulta=$this->conexion->prepare("UPDATE actividad SET puntuacion=? WHERE id_actividad=? AND id_voluntario=? AND cerrada=1;");
+				$consulta->bind_param("iii",$actividad->puntuacion,$actividad->id_actividad,$actividad->id_voluntario);
+				$consulta->execute();
+				return ($consulta->affected_rows==1);
+			}	
+		}
 
 		//Borra el usuario "$usuario", buscándolo por su id
 		public function deleteUsuario($usuario){

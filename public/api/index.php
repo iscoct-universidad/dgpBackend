@@ -180,16 +180,17 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 
 $app -> put('/api/actividades/proponerFechaLocalizacion/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
-    $put=$request->getBody();
-    $put=json_decode($put,true);
-    $actividad=new Actividad;
-    $conexion_bd= new gestorBD();
-    $actividad->id_actividad=$args['id'];
-    $actividad->fecha=$put['fecha'];
-    $actividad->localizacion=$put['localizacion'];
+
     if ($comparison) {
         $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } else {
+        $put=$request->getBody();
+        $put=json_decode($put,true);
+        $actividad=new Actividad;
+        $conexion_bd= new gestorBD();
+        $actividad->id_actividad=$args['id'];
+        $actividad->fecha=$put['fecha'];
+        $actividad->localizacion=$put['localizacion'];
         $exito=$conexion_bd->proponerFechaLocalizacion($actividad);
         if ($exito)
             $response = setResponse($response,array('description' =>'OK'), 200);
@@ -206,9 +207,20 @@ $app -> put('/api/actividades/confirmarFechaLocalizacion/{id}', function (Reques
     if ($comparison) {
         $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } else {
-        $response = setResponse($response, 'Confirmando la asistencia de la fecha de localización', 200);
+        $put=$request->getBody();
+        $put=json_decode($put,true);
+        $actividad=new Actividad;
+        $conexion_bd= new gestorBD();
+        $actividad->id_actividad=$args['id'];
+        $actividad->cerrada=$put['cerrada'];
+        $exito = $conexion_bd->confirmarFechaLocalizacion($actividad);
+        if ($exito){
+            $response = setResponse($response,array( 'description'=>'OK'), 200);
+        }
+        else{
+            $response = setResponse($response,array( 'description'=>'No se pudo confirmar o rechazar la fecha y localizacion'), 400);
+        }
     }
-
     return $response;
 });
 
@@ -218,9 +230,20 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
     if ($comparison) {
         $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } else {
-        $response = setResponse($response, 'Valorando actividad', 200);
+        $put=$request->getBody();
+        $put=json_decode($put,true);
+        $actividad=new Actividad;
+        $conexion_bd= new gestorBD();
+        $actividad->id_actividad=$args['id'];
+        $actividad->puntuacion=$put['puntuacion'];
+        $exito = $conexion_bd->valorar($actividad);
+        if ($exito){
+            $response = setResponse($response,array( 'description'=>'OK'), 200);
+        }
+        else{
+            $response = setResponse($response,array( 'description'=>'No se pudo valorar la actividad'), 400);
+        }
     }
-
     return $response;
 });
 
