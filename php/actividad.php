@@ -8,9 +8,10 @@
 		public $localizacion;
 		public $descripcion;
 		public $puntuacion;
+		public $cerrada;
 		
 
-		public function __construct($id, $conexion){
+		/*public function __construct($id, $conexion){
 			$seleccion = "SELECT * FROM actividad WHERE id_actividad=" . $id;
 			$resultado = mysqli_query ($conexion, $seleccion);
 			$fila = mysqli_fetch_assoc ($resultado);
@@ -23,9 +24,10 @@
 			$this->localizacion=$fila['localizacion'];
 			$this->descripcion=$fila['descripcion'];
 			$this->puntuacion=$fila['puntuacion'];
-		}
+			$this->cerrada=$fila['cerrada'];
+		}*/
 
-		public function construct2($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion){
+		public function construct2($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion,$cerrada){
 			$this->id_actividad=$id_actividad;
 			$this->id_voluntario=$id_voluntario;
 			$this->id_socio=$id_socio;
@@ -34,6 +36,18 @@
 			$this->localizacion=$localizacion;
 			$this->descripcion=$descripcion;
 			$this->puntuacion=$puntuacion;
+			$this->cerrada=$cerrada;
+		}
+		public function constructFromAssociativeArray($associativeArray){
+			$this->id_actividad=$associativeArray['id_actividad'];
+			$this->id_voluntario=$associativeArray['id_voluntario'];
+			$this->id_socio=$associativeArray['id_socio'];
+			$this->nombre=$associativeArray['nombre'];
+			$this->fecha=$associativeArray['fecha'];
+			$this->localizacion=$associativeArray['localizacion'];
+			$this->descripcion=$associativeArray['descripcion'];
+			$this->puntuacion=$associativeArray['puntuacion'];
+			$this->cerrada=$associativeArray['cerrada'];
 		}
 	}
 ?>
