@@ -128,10 +128,11 @@ $app -> delete('/api/usuario/{id}', function (Request $request, Response $respon
 });
 
 $app -> get('/api/actividades', function (Request $request, Response $response, $args) {
-
-    $response = setResponse($response, 'Operación donde el usuario obtendrá las actividades
-        aceptadas por él y las que no han sido aceptadas.', 200);
-
+    
+    $actividades=array();
+    $conexion_bd= new gestorBD();
+    $actividades=$conexion_bd->getActividades();
+    $response = setResponse($response,array("actividades"=>$actividades), 200);
     return $response;
 });
 
@@ -141,7 +142,7 @@ $app-> get('/api/actividades/{id}', function (Request $request, Response $respon
     $actividad->id_actividad=$args[id];
     $actividad=$conexion_bd->getActividad($actividad);
     $response = setResponse($response,array('actividad'=>$actividad), 200);
-
+    $conexion_bd->close();
     return $response;
 });
 
@@ -149,36 +150,51 @@ $app -> put('/api/actividades/apuntarse/{id}', function (Request $request, Respo
     $actividad = new Actividad;
     $conexion_bd= new gestorBD();
     $actividad->id_actividad=$args['id'];
-        $exito=$conexion_bd->apuntarseActividad($actividad);
-        if ($exito)
-            $response = setResponse($response, array('description'=>'OK'), 200);
-        else
-            $response = setResponse($response, array('description'=>'No pudo apuntarse a la actividad'), 400);
-    }
-
+    $exito=$conexion_bd->apuntarseActividad($actividad);
+    if ($exito)
+        $response = setResponse($response, array('description'=>'OK'), 200);
+    else
+        $response = setResponse($response, array('description'=>'No pudo apuntarse a la actividad'), 400);
+    $conexion_bd->close();
     return $response;
 });
 
 $app -> post('/api/actividades', function (Request $request, Response $response, $args) {
-    $comparison = hasBodyJson($request);
-
     if ($comparison) {
         $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } else {
-        $response = setResponse($response, 'Modificando los datos relacionados de la actividad introducida', 200);
+        $comparison = hasBodyJson($request);
+        $post=$request->getBody();
+        $post=json_decode($post,true);
+        $actividad=new Actividad;
+        $conexion_bd= new gestorBD();
+        $actividad->nombre=$post['nombre'];
+        $actividad->descripcion=$post['descripcion'];
+        $exito=$conexion_bd->regActividad($actividad);
+        if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
+        else $response = setResponse($response, array('description'=>'No ha sido posible crear la actividad'), 400);
     }
-    
+    $conexion_bd->close();
     return $response;
 });
 
 $app -> put('/api/actividades/proponerFechaLocalizacion/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
-
+    $put=$request->getBody();
+    $put=json_decode($put,true);
+    $actividad=new Actividad;
+    $conexion_bd= new gestorBD();
+    $actividad->id_actividad=$args['id'];
+    $actividad->fecha=$put['fecha'];
+    $actividad->localizacion=$put['localizacion'];
     if ($comparison) {
         $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } else {
-
-        $response = setResponse($response, 'Proponiendo fecha y localización para la actividad', 200);
+        $exito=$conexion_bd->proponerFechaLocalizacion($actividad);
+        if ($exito)
+            $response = setResponse($response,array('description' =>'OK'), 200);
+        else
+            $response = setResponse($response,array('description' =>'No se pudo proponer esa fecha y hora'), 400);
     }
 
     return $response;

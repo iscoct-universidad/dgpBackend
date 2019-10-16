@@ -23,21 +23,28 @@
 
 		//Añade la actividad '$actividad' a la tabla, si no hay ya una actividad con ese nombre
 		public function regActividad($actividad){
-			$comprobar="SELECT * FROM actividades WHERE nombre=" . $actividad->nombre;
-			$resultado=mysqli_query($this->conexion, $comprobar);
-			if(mysqli_num_rows($resultado)>0){
-				echo "Error al registrar: La actividad ya existe.";
-				exit();
-			}
-			else if(is_null($actividad->nombre) or is_null($actividad->fecha) or is_null($actividad->localizacion) or is_null($actividad->descripcion)){
+			if(is_null($actividad->nombre) or is_null($actividad->descripcion)){
 				echo "Error al registrar actividad: hay campos obligatorios vacíos.";
-				exit();
+				return false;
 			}
 			else{
-				$envio = "INSERT INTO actividades (id_voluntario, id_socio, nombre, fecha, localizacion, descripcion, puntuacion, cerrada)
-					VALUES ($actividad->id_voluntario, $actividad->id_socio, $actividad->nombre, $actividad->fecha,
-					$actividad->localizacion, $actividad->descripcion, $actividad->puntuacion, $actividad->cerrada)";
-				mysqli_query($this->conexion, $envio);
+				$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
+				$consulta->bind_param("i",$_SESSION['id_usuario']);
+				$consulta->execute();
+				$fila_resultado = $consulta->get_result()->fetch_assoc();
+				if ($fila_resultado['rol']=='socio'){
+					$actividad->id_socio=$_SESSION['id_usuario'];
+					$consulta=$this->conexion->prepare("INSERT INTO actividad (nombre, descripcion,id_socio) VALUES (?,?,?);");
+					$consulta->bind_param("ssi",$actividad->nombre,$actividad->descripcion,$actividad->id_socio);
+				}
+				else{
+					$actividad->id_voluntario=$_SESSION['id_usuario'];
+					$consulta=$this->conexion->prepare("INSERT INTO actividad (nombre, descripcion,id_voluntario) VALUES (?,?,?);");
+					$consulta->bind_param("ssi",$actividad->nombre,$actividad->descripcion,$actividad->id_voluntario);
+				}
+				$consulta->execute();
+				echo $consulta->error;
+				return $consulta->affected_rows!=-1;		
 			}
 		}
 
@@ -225,7 +232,24 @@
 
 		//ProponerFechaHora
 		public function proponerFechaLocalizacion($actividad){
-			
+			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
+			$consulta->bind_param("i",$_SESSION['id_usuario']);
+			$consulta->execute();
+			$fila_resultado = $consulta->get_result()->fetch_assoc();
+			if ($fila_resultado['rol']=='socio'){
+				$actividad->id_socio=$_SESSION['id_usuario'];
+				$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=?, localizacion=? WHERE id_actividad=? AND id_socio=?;");
+				$consulta->bind_param("ssii",$actividad->fecha,$actividad->localizacion,$actividad->id_actividad,$actividad->id_socio);
+				$consulta->execute();
+				return ($consulta->affected_rows==1);
+			}
+			else{
+				$actividad->id_voluntario=$_SESSION['id_usuario'];
+				$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=?, localizacion=? WHERE id_actividad=? AND id_voluntario=?;");
+				$consulta->bind_param("ssii",$actividad->fecha,$actividad->localizacion,$actividad->id_actividad,$actividad->id_voluntario);
+				$consulta->execute();
+				return ($consulta->affected_rows==1);
+			}	
 		}
 
 		//Borra el usuario "$usuario", buscándolo por su id
@@ -238,6 +262,7 @@
 			return ($consulta->affected_rows==1);
 		}
 
+		/*
 		//Borra la actividad "$actividad", buscándola por su id
 		public function deleteActividad($actividad){
 			$comprobar="SELECT * FROM actividad WHERE id_actividad=" . $actividad->id_actividad;
@@ -251,7 +276,7 @@
 				mysqli_query($this->conexion, $envio);
 			}
 		}
-
+		*/
 
 		//Borrar todos los gustos de un usuario.
 		public function deleteAllGustos($id_usuario){
@@ -283,6 +308,55 @@
 			$actividad->puntuacion=$fila['puntuacion'];
 			$actividad->cerrada=$fila['cerrada'];
 			return $actividad;
+		}
+
+		public function getActividades(){
+			$actividades=array();
+			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
+			$consulta->bind_param("i",$_SESSION['id_usuario']);
+			$consulta->execute();
+			$fila_resultado = $consulta->get_result()->fetch_assoc();
+			if ($fila_resultado['rol']=='socio'){
+				$id_socio=$_SESSION['id_usuario'];
+				$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad WHERE id_socio=? AND cerrada=0;");
+				$consulta->bind_param("i",$id_socio);
+				$consulta->execute();
+				$resultado=$consulta->get_result();
+				while($fila_resultado = $resultado->fetch_assoc()){
+					$act=new Actividad;
+					$act->constructFromAssociativeArray($fila_resultado);
+					$actividades[]=$act;
+				}
+				$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad WHERE id_socio IS NULL;");
+				$consulta->execute();
+				$resultado=$consulta->get_result();
+				while($fila_resultado = $resultado->fetch_assoc()){
+					$act=new Actividad;
+					$act->constructFromAssociativeArray($fila_resultado);
+					$actividades[]=$act;
+				}
+			}
+			else{
+				$id_voluntario=$_SESSION['id_usuario'];
+				$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad WHERE id_voluntario=? AND cerrada=0;");
+				$consulta->bind_param("i",$id_voluntario);
+				$consulta->execute();
+				$resultado=$consulta->get_result();
+				while($fila_resultado = $resultado->fetch_assoc()){
+					$act=new Actividad;
+					$act->constructFromAssociativeArray($fila_resultado);
+					$actividades[]=$act;
+				}
+				$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad WHERE id_voluntario IS NULL;");
+				$consulta->execute();
+				$resultado=$consulta->get_result();
+				while($fila_resultado = $resultado->fetch_assoc()){
+					$act=new Actividad;
+					$act->constructFromAssociativeArray($fila_resultado);
+					$actividades[]=$act;
+				}
+			}
+			return $actividades;
 		}
 
 		/*

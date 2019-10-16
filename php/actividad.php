@@ -38,5 +38,16 @@
 			$this->puntuacion=$puntuacion;
 			$this->cerrada=$cerrada;
 		}
+		public function constructFromAssociativeArray($associativeArray){
+			$this->id_actividad=$associativeArray['id_actividad'];
+			$this->id_voluntario=$associativeArray['id_voluntario'];
+			$this->id_socio=$associativeArray['id_socio'];
+			$this->nombre=$associativeArray['nombre'];
+			$this->fecha=$associativeArray['fecha'];
+			$this->localizacion=$associativeArray['localizacion'];
+			$this->descripcion=$associativeArray['descripcion'];
+			$this->puntuacion=$associativeArray['puntuacion'];
+			$this->cerrada=$associativeArray['cerrada'];
+		}
 	}
 ?>
