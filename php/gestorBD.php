@@ -58,7 +58,7 @@
 				return false;
 			}
 			else if(is_null($usuario->rol) or is_null($usuario->nombre) or is_null($usuario->apellido1) or is_null($usuario->apellido2) or 
-					is_null($usuario->DNI) or is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
+					is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
 					is_null($usuario->telefono) or is_null($usuario->password)){
 				echo "Error al registrar usuario: Hay campos obligatorios vacíos.";
 				return false;
@@ -151,7 +151,7 @@
 				return false;
 			}
 			else if(is_null($usuario->rol) or is_null($usuario->nombre) or is_null($usuario->apellido1) or is_null($usuario->apellido2) or 
-					is_null($usuario->DNI) or is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
+					is_null($usuario->fecha_nacimiento) or is_null($usuario->localidad) or is_null($usuario->email) or 
 					is_null($usuario->telefono) or is_null($usuario->password)){
 				echo "Error al modificar usuario: Hay campos obligatorios vacíos.";
 				return false;
