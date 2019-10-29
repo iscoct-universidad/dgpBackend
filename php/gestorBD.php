@@ -142,6 +142,7 @@
 		}
 
 		//Modifica el usuario '$usuario', buscándolo por su id y cambiando el resto a los valores del objeto
+		//Si cambia a administrador, comprobar que el usuario de la sesion es administrador.
 		public function updateUsuario($usuario){
 			$consulta=$this->conexion->prepare("SELECT * FROM usuario WHERE id=?;");
 			$consulta->bind_param("i",$usuario->id);
@@ -413,6 +414,48 @@
 				}
 			}
 			return $actividades;
+		}
+
+		//Falta que devuelva valoración media de cada usuario.
+		public function getUsuarios(){
+			
+			if ($this->comprobarRolAdministrador($_SESSION['id_usuario'])){
+				$usuarios=array();
+				$consulta=$this->conexion->prepare("SELECT id,nombre FROM usuario;");
+				$consulta->execute();
+				$resultado=$consulta->get_result();
+				while($fila_resultado=$resultado->fetch_assoc()){
+					$usuario = new Usuario;
+					$usuario->id=$fila_resultado['id'];
+					$usuario->nombre=$fila_resultado['nombre'];
+					$usuarios[]=$usuario;
+				}
+				return $usuarios;
+			}
+			else
+				return null;
+		}
+
+		public function getUsuario($id_usuario){
+			$usuario=new Usuario;
+			$consulta=$this->conexion->prepare("SELECT rol,nombre,apellido1,apellido2,DNI,fecha_nacimiento,localidad,email,telefono,aspiraciones,observaciones,password 
+												FROM usuario WHERE id=?;");
+			$consulta->bind_param("i",$id_usuario);
+			$consulta->execute();
+			$resultado=$consulta->get_result();
+			$fila_resultado=$resultado->fetch_assoc();
+			$gustos;
+			$consulta2=$this->conexion->prepare("SELECT gusto FROM gustos WHERE id_usuario=?;");
+			$consulta2->bind_param("i",$id_usuario);
+			$consulta2->execute();
+			$resultado2=$consulta2->get_result();
+			while($fila_resultado2 = $resultado2->fetch_assoc()){
+				$gustos[]=$fila_resultado2['gusto'];
+			}
+			$usuario->construct2($fila_resultado['rol'],$fila_resultado['nombre'],$fila_resultado['apellido1'],$fila_resultado['apellido2'],$fila_resultado['DNI'],
+								$fila_resultado['fecha_nacimiento'],$fila_resultado['localidad'],$fila_resultado['email'],$fila_resultado['telefono'],$fila_resultado['aspiraciones'],$fila_resultado['observaciones'],$fila_resultado['password'],$gustos);
+			return $usuario;
+
 		}
 
 		/*

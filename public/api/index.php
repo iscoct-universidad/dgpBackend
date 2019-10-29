@@ -34,6 +34,27 @@ $app->get('/api/[health]', function (Request $request, Response $response, $args
     return $response;
 });
 
+$app->get('/api/usuario',function (Request $request,Response $response, $args) {
+
+    $conexion_bd= new gestorBD();
+    $post = $request->getBody();
+    $post=json_decode($post,true);
+    if (!is_null($post['id_usuario']) && $conexion_bd->comprobarRolAdministrador($_SESSION['id_usuario']))
+        $usuario=$conexion_bd->getUsuario($post['id_usuario']);
+    else
+        $usuario=$conexion_bd->getUsuario($_SESSION['id_usuario']);
+    $response = setResponse($response,array("usuario"=>$usuario), 200);
+    return $response;
+});
+
+$app->get('/api/usuarios',function (Request $request,Response $response, $args) {
+    $usuarios=array();
+    $conexion_bd= new gestorBD();
+    $usuarios=$conexion_bd->getUsuarios();
+    $response = setResponse($response,array("usuarios"=>$usuarios), 200);
+    return $response;
+});
+
 $app -> post('/api/usuario', function (Request $request,Response $response, $args) {
     $comparison = hasBodyJson($request);
     if ($comparison) {
