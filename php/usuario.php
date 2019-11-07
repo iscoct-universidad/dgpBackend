@@ -13,7 +13,7 @@
 		public $telefono;
 		public $aspiraciones;
 		public $observaciones;
-		public $url_image;
+		public $imagen;
 		public $gustos = array();
 
 		/*public function __construct($mail, $conexion){
@@ -36,7 +36,7 @@
 			$this->password=$fila['password'];
 		}*/
 
-		public function construct2($rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password,$url_image,$gustos){
+		public function construct2($rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password,$imagen,$gustos){
 			$this->rol=$rol;
 			$this->nombre=$nombre;
 			$this->apellido1=$apellido1;
@@ -49,7 +49,7 @@
 			$this->aspiraciones=$aspiraciones;
 			$this->observaciones=$observaciones;
 			$this->password=$password;
-			$this->url_image=$url_image;
+			$this->imagen=$imagen;
 			$this->gustos=$gustos;
 		}
 	}

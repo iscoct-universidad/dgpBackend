@@ -10,6 +10,7 @@
 		public $puntuacion;
 		public $cerrada;
 		public $imagen;
+		public $etiquetas = array();
 		
 
 		/*public function __construct($id, $conexion){
@@ -49,6 +50,7 @@
 			$this->descripcion=$associativeArray['descripcion'];
 			$this->puntuacion=$associativeArray['puntuacion'];
 			$this->cerrada=$associativeArray['cerrada'];
+			$this->imagen=$associativeArray['imagen'];
 		}
 	}
 ?>

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../php/gestorBD.php';
 require_once __DIR__ . '/../../php/usuario.php';
 
 $container = new Container();
-$container->set('upload_directory',__DIR__ . '/../../images');
+$container->set('upload_directory',__DIR__ . '/../images');
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
@@ -114,12 +114,18 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
 });
 
 $app -> put('/api/usuario', function (Request $request, Response $response, $args) {
-    $comparison = hasBodyJson($request);
-
-    if ($comparison) {
-        $response = setReponse($response, 'El cuerpo no contiene json', 400);
-    } else {
         $conexion_bd= new gestorBD();
+
+        $uploadFiles = $request->getUploadedFiles();
+        $imageFile = $uploadFiles['imagen'];
+    
+        if ($imageFile->getError() === UPLOAD_ERR_OK){
+            $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+        }
+        else{
+            $imagePath=null;
+        }
+
         $put=$request->getBody();
         $put=json_decode($put,true);
         $new_gustos = array();
@@ -128,7 +134,7 @@ $app -> put('/api/usuario', function (Request $request, Response $response, $arg
 
         $new_user= new Usuario;
         $new_user->construct2($put['rol'],$put['nombre'], $put['apellido1'], $put['apellido2'], $put['DNI'], $put['fecha_nacimiento'], $put['localidad'],
-                             $put['email'], $put['telefono'], $put['aspiraciones'], $put['observaciones'],$put['password'],$new_gustos);
+                             $put['email'], $put['telefono'], $put['aspiraciones'], $put['observaciones'],$put['password'],$imagePath,$new_gustos);
         $new_user->id=$_SESSION['id_usuario'];
 
         $exito = $conexion_bd->updateUsuario($new_user);
@@ -138,7 +144,6 @@ $app -> put('/api/usuario', function (Request $request, Response $response, $arg
         else
             $response =setResponse($response,array('description'=> 'No tiene permiso para modificar el usuario, hay campos obligatorios vacíos o se incluyeron gustos repetidos.'), 400);
         $conexion_bd->close();
-    }
     return $response;
 });
 
@@ -188,7 +193,6 @@ $app -> put('/api/actividades/apuntarse/{id}', function (Request $request, Respo
     return $response;
 });
 
-//Falta almacenar las etiquetas asociadas.
 $app -> post('/api/actividades', function (Request $request, Response $response, $args) {
 
     $uploadFiles = $request->getUploadedFiles();
@@ -201,8 +205,6 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
         $imagePath=null;
     }
 
-
-
     $post=$request->getBody();
     $post=json_decode($post,true);
     $actividad=new Actividad;
@@ -210,6 +212,11 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
     $actividad->nombre=$post['nombre'];
     $actividad->descripcion=$post['descripcion'];
     $actividad->imagen=$imagePath;
+    $new_etiquetas = array();
+    for ($i=0;$i<count($post['etiquetas']);$i++){
+        $new_etiquetas[]=$post['etiquetas'][$i];
+    }
+    $actividad->etiquetas=$new_etiquetas;
     $exito=$conexion_bd->regActividad($actividad);
     if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
     else $response = setResponse($response, array('description'=>'No ha sido posible crear la actividad'), 400);
