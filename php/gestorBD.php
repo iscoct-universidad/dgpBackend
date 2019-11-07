@@ -34,13 +34,13 @@
 				$fila_resultado = $consulta->get_result()->fetch_assoc();
 				if ($fila_resultado['rol']=='socio'){
 					$actividad->id_socio=$_SESSION['id_usuario'];
-					$consulta=$this->conexion->prepare("INSERT INTO actividad (nombre, descripcion,id_socio) VALUES (?,?,?);");
-					$consulta->bind_param("ssi",$actividad->nombre,$actividad->descripcion,$actividad->id_socio);
+					$consulta=$this->conexion->prepare("INSERT INTO actividad (nombre, descripcion,id_socio,imagen) VALUES (?,?,?,?);");
+					$consulta->bind_param("ssis",$actividad->nombre,$actividad->descripcion,$actividad->id_socio,$actividad->imagen);
 				}
 				else{
 					$actividad->id_voluntario=$_SESSION['id_usuario'];
-					$consulta=$this->conexion->prepare("INSERT INTO actividad (nombre, descripcion,id_voluntario) VALUES (?,?,?);");
-					$consulta->bind_param("ssi",$actividad->nombre,$actividad->descripcion,$actividad->id_voluntario);
+					$consulta=$this->conexion->prepare("INSERT INTO actividad (nombre, descripcion,id_voluntario,imagen) VALUES (?,?,?,?);");
+					$consulta->bind_param("ssis",$actividad->nombre,$actividad->descripcion,$actividad->id_voluntario,$actividad->imagen);
 				}
 				$consulta->execute();
 				echo $consulta->error;
@@ -73,11 +73,11 @@
 			}
 			else{
 				$exito=false;
-				$consulta=$this->conexion->prepare("INSERT INTO usuario (rol, nombre, apellido1, apellido2, DNI, fecha_nacimiento, localidad, email, telefono, aspiraciones, observaciones, password)
-				 VALUES (?,?,?,?,?,?,?,?,?,?,?,?);");
-				$consulta->bind_param("ssssssssisss",$usuario->rol,$usuario->nombre, $usuario->apellido1, $usuario->apellido2, 
+				$consulta=$this->conexion->prepare("INSERT INTO usuario (rol, nombre, apellido1, apellido2, DNI, fecha_nacimiento, localidad, email, telefono, aspiraciones, observaciones, password, imagen)
+				 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);");
+				$consulta->bind_param("ssssssssissss",$usuario->rol,$usuario->nombre, $usuario->apellido1, $usuario->apellido2, 
 							$usuario->DNI,$usuario->fecha_nacimiento,$usuario->localidad,$usuario->email, $usuario->telefono,
-							$usuario->aspiraciones, $usuario->observaciones, $usuario->password);
+							$usuario->aspiraciones, $usuario->observaciones, $usuario->password, $usuario->url_image);
 				$consulta->execute();
 				$exito=$consulta->affected_rows;
 				$usuario->id = $this->getIdUsuario($usuario->email);

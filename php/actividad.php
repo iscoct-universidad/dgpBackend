@@ -9,6 +9,7 @@
 		public $descripcion;
 		public $puntuacion;
 		public $cerrada;
+		public $imagen;
 		
 
 		/*public function __construct($id, $conexion){
