@@ -31,10 +31,23 @@ function setResponse(Response $response, $array_body, int $status) {
     return $response;
 }
 
+function setHeader(Response $response) {
+	return $response -> withHeader('Access-Control-Allow-Origin', '*')
+		-> withHeader('Access-Control-Allow-Methods', '*')
+		-> withHeader('Access-Control-Max-Age', '9999999')
+		-> withHeader('Access-Control-Allow-Headers', 'access-control-allow-origin, content-type');
+
+}
+
+$app -> options('/[{path:.*}]', function (Request $request, Response $response, $args) {
+	
+	return setHeader($response);
+});
+
 $app->get('/api/[health]', function (Request $request, Response $response, $args) {
     $response -> getBody() -> write("El servidor está corriendo");
 
-    return $response;
+    return setHeader($response);
 });
 
 $app->get('/api/usuario',function (Request $request,Response $response, $args) {
@@ -79,7 +92,8 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
         
         $conexion_bd->close();
     }
-    return $response;
+
+    return setHeader($response);
 });
 
 $app -> post('/api/usuario/nuevo', function (Request $request, Response $response, $args) {
