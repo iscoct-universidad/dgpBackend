@@ -1,6 +1,6 @@
 {
     "require": {
-        "slim/slim": "4.0.0",
+        "slim/slim": "^4.2.0",
         "nyholm/psr7": "^1.2",
         "nyholm/psr7-server": "^0.3.0",
         "guzzlehttp/psr7": "^1.6",
@@ -8,6 +8,9 @@
         "zendframework/zend-diactoros": "^2.1",
         "slim/twig-view": "^2.5",
         "slim/psr7": "^0.6.0",
-        "twig/twig": "^2.0"
-    }
+        "twig/twig": "^2.0",
+        "php-di/slim-bridge": "^3.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
