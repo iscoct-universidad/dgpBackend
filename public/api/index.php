@@ -104,20 +104,28 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
 $app -> post('/api/usuario/nuevo', function (Request $request, Response $response, $args) {
     $conexion_bd= new gestorBD();
     $uploadFiles = $request->getUploadedFiles();
-    $imageFile = $uploadFiles['imagen'];
 
-    if ($imageFile->getError() === UPLOAD_ERR_OK){
-        $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
-    }
-    else{
-        $imagePath=null;
+	if (count($uploadFiles) > 0) {
+		$imageFile = $uploadFiles['imagen'];
+
+		if ($imageFile->getError() === UPLOAD_ERR_OK){
+		    $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+		}
+		else{
+		    $imagePath = '';
+		}
+    } else {
+    	$imagePath = '';
     }
 
     $post=$request->getBody();
     $post=json_decode($post,true);
     $new_gustos = array();
-    for ($i=0;$i<count($post['gustos']);$i++){
-        $new_gustos[]=$post['gustos'][$i];
+
+	if (array_key_exists('gustos', $post)) {
+		for ($i=0;$i<count($post['gustos']);$i++) {
+		    $new_gustos[]=$post['gustos'][$i];
+		}
     }
     $new_user= new Usuario;
     $new_user->construct2($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
