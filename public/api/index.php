@@ -32,36 +32,40 @@ function setResponse(Response $response, $array_body, int $status) {
     return $response;
 }
 
-function setHeader(Response $response) {
-	return $response -> withHeader('Access-Control-Allow-Origin', '*')
-		-> withHeader('Access-Control-Allow-Methods', '*')
-		-> withHeader('Access-Control-Max-Age', '9999999')
-		-> withHeader('Access-Control-Allow-Headers', 'access-control-allow-origin, content-type');
+function setHeader(Request $request, Response $response) {
+	$origin = $request -> getHeader('Origin');
 
+	return $response -> withHeader('Access-Control-Allow-Origin', $origin)
+		-> withHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, PUT, POST, DELETE')
+		-> withHeader('Access-Control-Max-Age', '9999999')
+		-> withHeader('Access-Control-Allow-Headers', 'access-control-allow-origin, content-type')
+		-> withHeader('Access-Control-Allow-Credentials', 'true');
 }
 
 $app -> options('/[{path:.*}]', function (Request $request, Response $response, $args) {
 	
-	return setHeader($response);
+	return setHeader($request, $response);
 });
 
 $app->get('/api/[health]', function (Request $request, Response $response, $args) {
     $response -> getBody() -> write("El servidor está corriendo");
 
-    return setHeader($response);
+    return setHeader($request, $response);
 });
 
 $app->get('/api/usuario',function (Request $request,Response $response, $args) {
-
     $conexion_bd= new gestorBD();
     $post = $request->getBody();
     $post=json_decode($post,true);
     if (!is_null($post['id_usuario']) && $conexion_bd->comprobarRolAdministrador($_SESSION['id_usuario']))
         $usuario=$conexion_bd->getUsuario($post['id_usuario']);
-    else
+    else if($_SESSION['id_usuario'] !== NULL)
         $usuario=$conexion_bd->getUsuario($_SESSION['id_usuario']);
+    else
+    	$usuario = 'No esta seteada la sesión';
     $response = setResponse($response,array("usuario"=>$usuario), 200);
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 $app->get('/api/usuarios',function (Request $request,Response $response, $args) {
@@ -69,7 +73,7 @@ $app->get('/api/usuarios',function (Request $request,Response $response, $args) 
     $conexion_bd= new gestorBD();
     $usuarios=$conexion_bd->getUsuarios();
     $response = setResponse($response,array("usuarios"=>$usuarios), 200);
-    return $response;
+    return setHeader($request, $response);
 });
 
 $app -> post('/api/usuario', function (Request $request,Response $response, $args) {
@@ -86,7 +90,7 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
         $user->password = $post['password'];
         $exito = $conexion_bd->identificarUsuario($user);
         if ($exito){
-            $response = setResponse($response, array('description' => 'OK'), 200);
+            $response = setResponse($response, array('email' => $_SESSION['id_usuario'],'description' => 'OK'), 200);
         }
         else
             $response = setResponse($response, array('description' => 'No pudo identificarse al usuario'), 400);
@@ -94,26 +98,34 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
         $conexion_bd->close();
     }
 
-    return setHeader($response);
+    return setHeader($request, $response);
 });
 
 $app -> post('/api/usuario/nuevo', function (Request $request, Response $response, $args) {
     $conexion_bd= new gestorBD();
     $uploadFiles = $request->getUploadedFiles();
-    $imageFile = $uploadFiles['imagen'];
 
-    if ($imageFile->getError() === UPLOAD_ERR_OK){
-        $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
-    }
-    else{
-        $imagePath=null;
+	if (count($uploadFiles) > 0) {
+		$imageFile = $uploadFiles['imagen'];
+
+		if ($imageFile->getError() === UPLOAD_ERR_OK){
+		    $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+		}
+		else{
+		    $imagePath = '';
+		}
+    } else {
+    	$imagePath = '';
     }
 
     $post=$request->getBody();
     $post=json_decode($post,true);
     $new_gustos = array();
-    for ($i=0;$i<count($post['gustos']);$i++){
-        $new_gustos[]=$post['gustos'][$i];
+
+	if (array_key_exists('gustos', $post)) {
+		for ($i=0;$i<count($post['gustos']);$i++) {
+		    $new_gustos[]=$post['gustos'][$i];
+		}
     }
     $new_user= new Usuario;
     $new_user->construct2($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
@@ -125,7 +137,7 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
         $response =setResponse($response,array('description'=> 'Ya existe el usuario, hay campos obligatorios vacíos o se incluyeron gustos repetidos.'), 400);
     $conexion_bd->close();
 
-    return $response;
+    return setHeader($request, $response);
 });
 
 $app -> put('/api/usuario', function (Request $request, Response $response, $args) {
@@ -159,7 +171,8 @@ $app -> put('/api/usuario', function (Request $request, Response $response, $arg
         else
             $response =setResponse($response,array('description'=> 'No tiene permiso para modificar el usuario, hay campos obligatorios vacíos o se incluyeron gustos repetidos.'), 400);
         $conexion_bd->close();
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 $app -> delete('/api/usuario/{id}', function (Request $request, Response $response, $args) {
@@ -172,7 +185,8 @@ $app -> delete('/api/usuario/{id}', function (Request $request, Response $respon
     else
         $response =setResponse($response, array('description'=>'El usuario no se puede eliminar porque su id no está registrado'), 400);
     $conexion_bd->close();
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 //Falta devolver primero las que coinciden con los gustos del usuario.
@@ -182,7 +196,8 @@ $app -> get('/api/actividades', function (Request $request, Response $response, 
     $conexion_bd= new gestorBD();
     $actividades=$conexion_bd->getActividades();
     $response = setResponse($response,array("actividades"=>$actividades), 200);
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 $app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
@@ -192,7 +207,7 @@ $app-> get('/api/actividades/{id}', function (Request $request, Response $respon
     $actividad=$conexion_bd->getActividad($actividad);
     $response = setResponse($response,array('actividad'=>$actividad), 200);
     $conexion_bd->close();
-    return $response;
+    return setHeader($request, $response);
 });
 
 $app -> put('/api/actividades/apuntarse/{id}', function (Request $request, Response $response, $args) {
@@ -205,38 +220,44 @@ $app -> put('/api/actividades/apuntarse/{id}', function (Request $request, Respo
     else
         $response = setResponse($response, array('description'=>'No pudo apuntarse a la actividad'), 400);
     $conexion_bd->close();
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 $app -> post('/api/actividades', function (Request $request, Response $response, $args) {
-
     $uploadFiles = $request->getUploadedFiles();
-    $imageFile = $uploadFiles['imagen'];
 
-    if ($imageFile->getError() === UPLOAD_ERR_OK){
-        $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
-    }
-    else{
-        $imagePath=null;
+    if (! empty($uploadFiles)) {
+		$imageFile = $uploadFiles['imagen'];
+
+		if ($imageFile->getError() === UPLOAD_ERR_OK){
+		    $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+		}
+		else{
+		    $imagePath=null;
+		}
+
+		$post=$request->getBody();
+		$post=json_decode($post,true);
+		$actividad=new Actividad;
+		$conexion_bd= new gestorBD();
+		$actividad->nombre=$post['nombre'];
+		$actividad->descripcion=$post['descripcion'];
+		$actividad->imagen=$imagePath;
+		$new_etiquetas = array();
+		for ($i=0;$i<count($post['etiquetas']);$i++){
+		    $new_etiquetas[]=$post['etiquetas'][$i];
+		}
+		$actividad->etiquetas=$new_etiquetas;
+		$exito=$conexion_bd->regActividad($actividad);
+		if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
+		else $response = setResponse($response, array('description'=>'No ha sido posible crear la actividad'), 400);
+		$conexion_bd->close();
+    } else {
+    	$response = setResponse($response, array('description' => 'No ha sido posible crear la actividad'), 400);
     }
 
-    $post=$request->getBody();
-    $post=json_decode($post,true);
-    $actividad=new Actividad;
-    $conexion_bd= new gestorBD();
-    $actividad->nombre=$post['nombre'];
-    $actividad->descripcion=$post['descripcion'];
-    $actividad->imagen=$imagePath;
-    $new_etiquetas = array();
-    for ($i=0;$i<count($post['etiquetas']);$i++){
-        $new_etiquetas[]=$post['etiquetas'][$i];
-    }
-    $actividad->etiquetas=$new_etiquetas;
-    $exito=$conexion_bd->regActividad($actividad);
-    if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
-    else $response = setResponse($response, array('description'=>'No ha sido posible crear la actividad'), 400);
-    $conexion_bd->close();
-    return $response;
+    return setHeader($request, $response);
 });
 
 $app -> put('/api/actividades/proponerFechaLocalizacion/{id}', function (Request $request, Response $response, $args) {
@@ -259,7 +280,7 @@ $app -> put('/api/actividades/proponerFechaLocalizacion/{id}', function (Request
             $response = setResponse($response,array('description' =>'No se pudo proponer esa fecha y hora'), 400);
     }
 
-    return $response;
+    return setHeader($request, $response);
 });
 
 $app -> put('/api/actividades/confirmarFechaLocalizacion/{id}', function (Request $request, Response $response, $args) {
@@ -282,7 +303,8 @@ $app -> put('/api/actividades/confirmarFechaLocalizacion/{id}', function (Reques
             $response = setResponse($response,array( 'description'=>'No se pudo confirmar o rechazar la fecha y localizacion'), 400);
         }
     }
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 $app -> put('/api/actividades/valorar/{id}', function (Request $request, Response $response, $args) {
@@ -305,7 +327,8 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
             $response = setResponse($response,array( 'description'=>'No se pudo valorar la actividad'), 400);
         }
     }
-    return $response;
+
+    return setHeader($request, $response);
 });
 
 function moveUploadFile($directory, UploadedFileInterface $uploadedFile){

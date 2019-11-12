@@ -73,7 +73,7 @@
 				echo "Error al registrar usuario: Hay campos obligatorios vacíos.";
 				return false;
 			}
-			else if ($this->comprobarRolAdministrador($_SESSION['id_usuario'])){
+			else if (! $this->comprobarRolAdministrador($_SESSION['id_usuario'])){
 				echo "Error al registrar usuario: El usuario no es administrador.";
 				return false;
 			}
@@ -120,8 +120,12 @@
 			$consulta->bind_param("i",$id);
 			$consulta->execute();
 			$fila_resultado = $consulta->get_result()->fetch_assoc();
-			if($fila_resultado['rol']=="administrador")	return true;
-			else return false;
+			
+			if($fila_resultado['rol'] === "administrador") {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		//Función para identificar al usuario
@@ -432,139 +436,145 @@
 			$consulta->bind_param("i",$_SESSION['id_usuario']);
 			$consulta->execute();
 			$fila_resultado = $consulta->get_result()->fetch_assoc();
-			if ($fila_resultado['rol']=='socio'){
-				$id_socio=$_SESSION['id_usuario'];		
-				$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad WHERE id_socio=? AND cerrada=0;");
-				$consulta->bind_param("i",$id_socio);
-				$consulta->execute();
-				$resultado=$consulta->get_result();
-				while($fila_resultado = $resultado->fetch_assoc()){
-					$act=new Actividad;
-					$act->constructFromAssociativeArray($fila_resultado);
-					$etiquetas;
-					$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
-					$consulta2->bind_param("i",$act->id_actividad);
-					$consulta2->execute();
-					$resultado2=$consulta2->get_result();
-					while($fila_resultado2 = $resultado2->fetch_assoc()){
-						$etiquetas[]=$fila_resultado2['etiqueta'];
-					}
-					$actividad->etiquetas = $etiquetas;
+			
+			$someResult = empty($file_resultado);
+			
+			if (! $someResult) {
+				if ($fila_resultado['rol']=='socio'){
+					$id_socio=$_SESSION['id_usuario'];		
+					$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad WHERE id_socio=? AND cerrada=0;");
+					$consulta->bind_param("i",$id_socio);
+					$consulta->execute();
+					$resultado=$consulta->get_result();
+					while($fila_resultado = $resultado->fetch_assoc()){
+						$act=new Actividad;
+						$act->constructFromAssociativeArray($fila_resultado);
+						$etiquetas;
+						$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
+						$consulta2->bind_param("i",$act->id_actividad);
+						$consulta2->execute();
+						$resultado2=$consulta2->get_result();
+						while($fila_resultado2 = $resultado2->fetch_assoc()){
+							$etiquetas[]=$fila_resultado2['etiqueta'];
+						}
+						$actividad->etiquetas = $etiquetas;
 
-					$actividades[]=$act;
+						$actividades[]=$act;
+					}
+					// LAS QUE COINCIDEN CON ALGÚN GUSTO SUYO
+					$consulta=$this->conexion->prepare("SELECT DISTINCT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad,actividad_etiquetas,gustos 
+									WHERE actividad.id_socio IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta;");
+					$consulta->bind_param("i",$id_socio);
+					$consulta->execute();
+					$resultado=$consulta->get_result();
+					while($fila_resultado = $resultado->fetch_assoc()){
+						$act=new Actividad;
+						$act->constructFromAssociativeArray($fila_resultado);
+						$etiquetas;
+						$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
+						$consulta2->bind_param("i",$act->id_actividad);
+						$consulta2->execute();
+						$resultado2=$consulta2->get_result();
+						while($fila_resultado2 = $resultado2->fetch_assoc()){
+							$etiquetas[]=$fila_resultado2['etiqueta'];
+						}
+						$actividad->etiquetas = $etiquetas;
+
+						$actividades[]=$act;
+					}
+
+					//LAS QUE NO COINCIDEN CON NINGÚN GUSTO SUYO.
+					$consulta=$this->conexion->prepare("SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad 
+									WHERE id_socio IS NULL AND NOT EXISTS
+									(SELECT DISTINCT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad,actividad_etiquetas,gustos 
+									WHERE actividad.id_socio IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta);");
+					$consulta->bind_param("i",$id_socio);
+					$consulta->execute();
+					$resultado=$consulta->get_result();
+					while($fila_resultado = $resultado->fetch_assoc()){
+						$act=new Actividad;
+						$act->constructFromAssociativeArray($fila_resultado);
+						$etiquetas;
+						$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
+						$consulta2->bind_param("i",$act->id_actividad);
+						$consulta2->execute();
+						$resultado2=$consulta2->get_result();
+						while($fila_resultado2 = $resultado2->fetch_assoc()){
+							$etiquetas[]=$fila_resultado2['etiqueta'];
+						}
+						$actividad->etiquetas = $etiquetas;
+
+						$actividades[]=$act;
+					}
 				}
-				// LAS QUE COINCIDEN CON ALGÚN GUSTO SUYO
-				$consulta=$this->conexion->prepare("SELECT DISTINCT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad,actividad_etiquetas,gustos 
-								WHERE actividad.id_socio IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta;");
-				$consulta->bind_param("i",$id_socio);
-				$consulta->execute();
-				$resultado=$consulta->get_result();
-				while($fila_resultado = $resultado->fetch_assoc()){
-					$act=new Actividad;
-					$act->constructFromAssociativeArray($fila_resultado);
-					$etiquetas;
-					$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
-					$consulta2->bind_param("i",$act->id_actividad);
-					$consulta2->execute();
-					$resultado2=$consulta2->get_result();
-					while($fila_resultado2 = $resultado2->fetch_assoc()){
-						$etiquetas[]=$fila_resultado2['etiqueta'];
+				else{
+					$id_voluntario=$_SESSION['id_usuario'];
+					$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad WHERE id_voluntario=? AND cerrada=0;");
+					$consulta->bind_param("i",$id_voluntario);
+					$consulta->execute();
+					$resultado=$consulta->get_result();
+					while($fila_resultado = $resultado->fetch_assoc()){
+						$act=new Actividad;
+						$act->constructFromAssociativeArray($fila_resultado);
+						$etiquetas;
+						$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
+						$consulta2->bind_param("i",$act->id_actividad);
+						$consulta2->execute();
+						$resultado2=$consulta2->get_result();
+						while($fila_resultado2 = $resultado2->fetch_assoc()){
+							$etiquetas[]=$fila_resultado2['etiqueta'];
+						}
+						$actividad->etiquetas = $etiquetas;
+
+						$actividades[]=$act;
 					}
-					$actividad->etiquetas = $etiquetas;
+					//LAS QUE COINCIDEN CON ALGÚN GUSTO SUYO
+					$consulta=$this->conexion->prepare("SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad,actividad_etiquetas,gustos 
+					WHERE actividad.id_voluntario IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta;");
+					$consulta->bind_param("i",$id_voluntario);
+					$consulta->execute();
+					$resultado=$consulta->get_result();
+					while($fila_resultado = $resultado->fetch_assoc()){
+						$act=new Actividad;
+						$act->constructFromAssociativeArray($fila_resultado);
+						$etiquetas;
+						$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
+						$consulta2->bind_param("i",$act->id_actividad);
+						$consulta2->execute();
+						$resultado2=$consulta2->get_result();
+						while($fila_resultado2 = $resultado2->fetch_assoc()){
+							$etiquetas[]=$fila_resultado2['etiqueta'];
+						}
+						$actividad->etiquetas = $etiquetas;
 
-					$actividades[]=$act;
-				}
-
-				//LAS QUE NO COINCIDEN CON NINGÚN GUSTO SUYO.
-				$consulta=$this->conexion->prepare("SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad 
-								WHERE id_socio IS NULL AND NOT EXISTS
-								(SELECT DISTINCT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad,actividad_etiquetas,gustos 
-								WHERE actividad.id_socio IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta);");
-				$consulta->bind_param("i",$id_socio);
-				$consulta->execute();
-				$resultado=$consulta->get_result();
-				while($fila_resultado = $resultado->fetch_assoc()){
-					$act=new Actividad;
-					$act->constructFromAssociativeArray($fila_resultado);
-					$etiquetas;
-					$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
-					$consulta2->bind_param("i",$act->id_actividad);
-					$consulta2->execute();
-					$resultado2=$consulta2->get_result();
-					while($fila_resultado2 = $resultado2->fetch_assoc()){
-						$etiquetas[]=$fila_resultado2['etiqueta'];
+						$actividades[]=$act;
 					}
-					$actividad->etiquetas = $etiquetas;
 
-					$actividades[]=$act;
+					//LAS QUE NO COINCIDEN CON ALGÚN GUSTO SUYO
+					$consulta=$this->conexion->prepare("SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad 
+					WHERE id_voluntario IS NULL AND NOT EXISTS (SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad,actividad_etiquetas,gustos 
+					WHERE actividad.id_voluntario IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta);");
+					$consulta->bind_param("i",$id_voluntario);
+					$consulta->execute();
+					$resultado=$consulta->get_result();
+					while($fila_resultado = $resultado->fetch_assoc()){
+						$act=new Actividad;
+						$act->constructFromAssociativeArray($fila_resultado);
+						$etiquetas;
+						$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
+						$consulta2->bind_param("i",$act->id_actividad);
+						$consulta2->execute();
+						$resultado2=$consulta2->get_result();
+						while($fila_resultado2 = $resultado2->fetch_assoc()){
+							$etiquetas[]=$fila_resultado2['etiqueta'];
+						}
+						$actividad->etiquetas = $etiquetas;
+
+						$actividades[]=$act;
+					}
 				}
 			}
-			else{
-				$id_voluntario=$_SESSION['id_usuario'];
-				$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad WHERE id_voluntario=? AND cerrada=0;");
-				$consulta->bind_param("i",$id_voluntario);
-				$consulta->execute();
-				$resultado=$consulta->get_result();
-				while($fila_resultado = $resultado->fetch_assoc()){
-					$act=new Actividad;
-					$act->constructFromAssociativeArray($fila_resultado);
-					$etiquetas;
-					$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
-					$consulta2->bind_param("i",$act->id_actividad);
-					$consulta2->execute();
-					$resultado2=$consulta2->get_result();
-					while($fila_resultado2 = $resultado2->fetch_assoc()){
-						$etiquetas[]=$fila_resultado2['etiqueta'];
-					}
-					$actividad->etiquetas = $etiquetas;
 
-					$actividades[]=$act;
-				}
-				//LAS QUE COINCIDEN CON ALGÚN GUSTO SUYO
-				$consulta=$this->conexion->prepare("SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad,actividad_etiquetas,gustos 
-				WHERE actividad.id_voluntario IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta;");
-				$consulta->bind_param("i",$id_voluntario);
-				$consulta->execute();
-				$resultado=$consulta->get_result();
-				while($fila_resultado = $resultado->fetch_assoc()){
-					$act=new Actividad;
-					$act->constructFromAssociativeArray($fila_resultado);
-					$etiquetas;
-					$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
-					$consulta2->bind_param("i",$act->id_actividad);
-					$consulta2->execute();
-					$resultado2=$consulta2->get_result();
-					while($fila_resultado2 = $resultado2->fetch_assoc()){
-						$etiquetas[]=$fila_resultado2['etiqueta'];
-					}
-					$actividad->etiquetas = $etiquetas;
-
-					$actividades[]=$act;
-				}
-
-				//LAS QUE NO COINCIDEN CON ALGÚN GUSTO SUYO
-				$consulta=$this->conexion->prepare("SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad 
-				WHERE id_voluntario IS NULL AND NOT EXISTS (SELECT actividad.id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion FROM actividad,actividad_etiquetas,gustos 
-				WHERE actividad.id_voluntario IS NULL AND actividad.id_actividad=actividad_etiquetas.id_actividad AND gustos.id_usuario=? AND gustos.gusto=actividad_etiquetas.etiqueta);");
-				$consulta->bind_param("i",$id_voluntario);
-				$consulta->execute();
-				$resultado=$consulta->get_result();
-				while($fila_resultado = $resultado->fetch_assoc()){
-					$act=new Actividad;
-					$act->constructFromAssociativeArray($fila_resultado);
-					$etiquetas;
-					$consulta2=$this->conexion->prepare("SELECT etiqueta FROM actividad_etiquetas WHERE id_actividad=?;");
-					$consulta2->bind_param("i",$act->id_actividad);
-					$consulta2->execute();
-					$resultado2=$consulta2->get_result();
-					while($fila_resultado2 = $resultado2->fetch_assoc()){
-						$etiquetas[]=$fila_resultado2['etiqueta'];
-					}
-					$actividad->etiquetas = $etiquetas;
-
-					$actividades[]=$act;
-				}
-			}
 			return $actividades;
 		}
 
@@ -597,7 +607,7 @@
 			$consulta->execute();
 			$resultado=$consulta->get_result();
 			$fila_resultado=$resultado->fetch_assoc();
-			$gustos;
+			$gustos = [];
 			$consulta2=$this->conexion->prepare("SELECT gusto FROM gustos WHERE id_usuario=?;");
 			$consulta2->bind_param("i",$id_usuario);
 			$consulta2->execute();
