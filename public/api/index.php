@@ -20,6 +20,7 @@ session_start();
 function hasBodyJson(Request $request) {
     $contentType = $request -> getHeaderLine('Content-Type');
     $comparison = strcmp($contentType, 'application/json');
+   
     return $comparison;
 }
 
@@ -76,9 +77,31 @@ $app->get('/api/usuarios',function (Request $request,Response $response, $args) 
     return setHeader($request, $response);
 });
 
+$app -> get('/api/usuario/{id}', function (Request $request, Response $response, $args) {
+	$conexion_bd = new gestorBD();
+	$isIdDefined = ! is_null($args['id']);
+	$isSuperuser = $conexion_bd -> comprobarRolAdministrador($_SESSION['id_usuario']);
+	$code = 200;
+
+	if ($isIdDefined && $isSuperuser) {
+		$usuario = $conexion_bd -> getUsuario($args['id']);
+	} else if (! $isSuperuser) {
+		$usuario = 'You are not superuser in this system';
+		$code = 403;
+	} else {
+		$usuario = 'Id is not set';
+		$code = 400;
+	}
+	
+	$response = setResponse($response, array("usuario" => $usuario), $code);
+	
+	return setHeader($request, $response);
+});
+
 $app -> post('/api/usuario', function (Request $request,Response $response, $args) {
     $comparison = hasBodyJson($request);
     if ($comparison) {
+    	var_dump($comparison);
         $response = setResponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } 
     else {
@@ -144,13 +167,18 @@ $app -> put('/api/usuario', function (Request $request, Response $response, $arg
         $conexion_bd= new gestorBD();
 
         $uploadFiles = $request->getUploadedFiles();
-        $imageFile = $uploadFiles['imagen'];
-    
-        if ($imageFile->getError() === UPLOAD_ERR_OK){
-            $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
-        }
-        else{
-            $imagePath=null;
+        
+        if (! empty($uploadFiles)) {
+		    $imageFile = $uploadFiles['imagen'];
+		
+		    if ($imageFile->getError() === UPLOAD_ERR_OK){
+		        $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+		    }
+		    else{
+		        $imagePath = '';
+		    }
+        } else {
+        	$imagePath = '';
         }
 
         $put=$request->getBody();
