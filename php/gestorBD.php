@@ -437,9 +437,6 @@
 			$consulta->execute();
 			$fila_resultado = $consulta->get_result()->fetch_assoc();
 			
-			$someResult = empty($file_resultado);
-			
-			if (! $someResult) {
 				if ($fila_resultado['rol']=='socio'){
 					$id_socio=$_SESSION['id_usuario'];		
 					$consulta=$this->conexion->prepare("SELECT id_actividad,id_socio,id_voluntario,fecha,localizacion,cerrada,nombre,descripcion,imagen FROM actividad WHERE id_socio=? AND cerrada=0;");
@@ -573,8 +570,6 @@
 						$actividades[]=$act;
 					}
 				}
-			}
-
 			return $actividades;
 		}
 
