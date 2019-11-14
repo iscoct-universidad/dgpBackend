@@ -20,6 +20,7 @@ session_start();
 function hasBodyJson(Request $request) {
     $contentType = $request -> getHeaderLine('Content-Type');
     $comparison = strcmp($contentType, 'application/json');
+    if ($comparison) $comparison = strcmp($contentType,'application/json; charset=utf-8');
     return $comparison;
 }
 
@@ -90,7 +91,7 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
         $user->password = $post['password'];
         $exito = $conexion_bd->identificarUsuario($user);
         if ($exito){
-            $response = setResponse($response, array('email' => $_SESSION['id_usuario'],'description' => 'OK'), 200);
+            $response = setResponse($response, array('id_usuario' => $_SESSION['id_usuario'],'description' => 'OK'), 200);
         }
         else
             $response = setResponse($response, array('description' => 'No pudo identificarse al usuario'), 400);
@@ -109,7 +110,7 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
 		$imageFile = $uploadFiles['imagen'];
 
 		if ($imageFile->getError() === UPLOAD_ERR_OK){
-		    $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+		    $imagePath =moveUploadFile($this->get('upload_directory'),$imageFile);
 		}
 		else{
 		    $imagePath = '';
@@ -118,8 +119,7 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
     	$imagePath = '';
     }
 
-    $post=$request->getBody();
-    $post=json_decode($post,true);
+    $post=$request->getParsedBody();
     $new_gustos = array();
 
 	if (array_key_exists('gustos', $post)) {
@@ -147,17 +147,19 @@ $app -> put('/api/usuario', function (Request $request, Response $response, $arg
         $imageFile = $uploadFiles['imagen'];
     
         if ($imageFile->getError() === UPLOAD_ERR_OK){
-            $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+            $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
         }
         else{
             $imagePath=null;
         }
 
-        $put=$request->getBody();
-        $put=json_decode($put,true);
+        $put=$request->getParsedBody();
         $new_gustos = array();
-        for ($i=0;$i<count($put['gustos']);$i++)
-            $new_gustos []=$put['gustos'][$i];
+        if (array_key_exists('gustos', $post)) {
+            for ($i=0;$i<count($post['gustos']);$i++) {
+                $new_gustos[]=$post['gustos'][$i];
+            }
+        }
 
         $new_user= new Usuario;
         $new_user->construct2($put['rol'],$put['nombre'], $put['apellido1'], $put['apellido2'], $put['DNI'], $put['fecha_nacimiento'], $put['localidad'],
@@ -231,23 +233,24 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 		$imageFile = $uploadFiles['imagen'];
 
 		if ($imageFile->getError() === UPLOAD_ERR_OK){
-		    $imagePath = moveUploadFile($this->get('upload_directory',$imageFile));
+		    $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
 		}
 		else{
 		    $imagePath=null;
 		}
 
-		$post=$request->getBody();
-		$post=json_decode($post,true);
+		$post=$request->getParsedBody();
 		$actividad=new Actividad;
 		$conexion_bd= new gestorBD();
 		$actividad->nombre=$post['nombre'];
 		$actividad->descripcion=$post['descripcion'];
 		$actividad->imagen=$imagePath;
-		$new_etiquetas = array();
-		for ($i=0;$i<count($post['etiquetas']);$i++){
-		    $new_etiquetas[]=$post['etiquetas'][$i];
-		}
+        $new_etiquetas = array();
+        if (array_key_exists('etiquetas', $post)) {
+            for ($i=0;$i<count($post['etiquetas']);$i++){
+                $new_etiquetas[]=$post['etiquetas'][$i];
+            }
+        }
 		$actividad->etiquetas=$new_etiquetas;
 		$exito=$conexion_bd->regActividad($actividad);
 		if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
@@ -331,10 +334,10 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
     return setHeader($request, $response);
 });
 
-function moveUploadFile($directory, UploadedFileInterface $uploadedFile){
+function moveUploadFile($directory, $uploadedFile){
     $extendion = pathinfo($uploadedFile->getClientFilename(),PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
-    $filename = sprintf('%s.%0,8s', $basename, $extension);
+    $filename = sprintf('%s.%0,png', $basename, $extension);
 
     $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
 
