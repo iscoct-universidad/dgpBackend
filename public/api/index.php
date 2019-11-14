@@ -20,7 +20,9 @@ session_start();
 function hasBodyJson(Request $request) {
     $contentType = $request -> getHeaderLine('Content-Type');
     $comparison = strcmp($contentType, 'application/json');
+   
     if ($comparison) $comparison = strcmp($contentType,'application/json; charset=utf-8');
+
     return $comparison;
 }
 
@@ -75,6 +77,27 @@ $app->get('/api/usuarios',function (Request $request,Response $response, $args) 
     $usuarios=$conexion_bd->getUsuarios();
     $response = setResponse($response,array("usuarios"=>$usuarios), 200);
     return setHeader($request, $response);
+});
+
+$app -> get('/api/usuario/{id}', function (Request $request, Response $response, $args) {
+	$conexion_bd = new gestorBD();
+	$isIdDefined = ! is_null($args['id']);
+	$isSuperuser = $conexion_bd -> comprobarRolAdministrador($_SESSION['id_usuario']);
+	$code = 200;
+
+	if ($isIdDefined && $isSuperuser) {
+		$usuario = $conexion_bd -> getUsuario($args['id']);
+	} else if (! $isSuperuser) {
+		$usuario = 'You are not superuser in this system';
+		$code = 403;
+	} else {
+		$usuario = 'Id is not set';
+		$code = 400;
+	}
+	
+	$response = setResponse($response, array("usuario" => $usuario), $code);
+	
+	return setHeader($request, $response);
 });
 
 $app -> post('/api/usuario', function (Request $request,Response $response, $args) {
