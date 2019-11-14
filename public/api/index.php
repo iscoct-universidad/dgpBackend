@@ -163,20 +163,26 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
     return setHeader($request, $response);
 });
 
-$app -> put('/api/usuario', function (Request $request, Response $response, $args) {
+$app -> post('/api/usuario/modificar', function (Request $request, Response $response, $args) {
         $conexion_bd= new gestorBD();
 
         $uploadFiles = $request->getUploadedFiles();
-        $imageFile = $uploadFiles['imagen'];
-    
-        if ($imageFile->getError() === UPLOAD_ERR_OK){
-            $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
-        }
-        else{
-            $imagePath=null;
+        $filesLength = count($uploadFiles);
+
+        if ($filesLength > 0) {
+		    $imageFile = $uploadFiles['imagen'];
+		
+		    if ($imageFile->getError() === UPLOAD_ERR_OK){
+		        $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
+		    }
+		    else{
+		        $imagePath=null;
+		    }
+        } else {
+        	$imagePath = null;
         }
 
-        $put=$request->getParsedBody();
+        $post=$request->getParsedBody();
         $new_gustos = array();
         if (array_key_exists('gustos', $post)) {
             for ($i=0;$i<count($post['gustos']);$i++) {
@@ -185,9 +191,9 @@ $app -> put('/api/usuario', function (Request $request, Response $response, $arg
         }
 
         $new_user= new Usuario;
-        $new_user->construct2($put['rol'],$put['nombre'], $put['apellido1'], $put['apellido2'], $put['DNI'], $put['fecha_nacimiento'], $put['localidad'],
-                             $put['email'], $put['telefono'], $put['aspiraciones'], $put['observaciones'],$put['password'],$imagePath,$new_gustos);
-        $new_user->id=$_SESSION['id_usuario'];
+        $new_user->construct2($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
+                             $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
+        $new_user->id=$post['id'];
 
         $exito = $conexion_bd->updateUsuario($new_user);
 
