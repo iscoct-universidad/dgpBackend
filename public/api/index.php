@@ -103,7 +103,6 @@ $app -> get('/api/usuario/{id}', function (Request $request, Response $response,
 $app -> post('/api/usuario', function (Request $request,Response $response, $args) {
     $comparison = hasBodyJson($request);
     if ($comparison) {
-    	var_dump($comparison);
         $response = setResponse($response, array('description' =>'El cuerpo no contiene json'), 400);
     } 
     else {
