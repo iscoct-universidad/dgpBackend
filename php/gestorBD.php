@@ -204,16 +204,13 @@
 				return false;				
 			}
 			else{
-				$consulta=$this->conexion->prepare("UPDATE usuario SET rol=?, nombre=?, apellido1=?,
-					apellido2=?, DNI=?, fecha_nacimiento=?,
-					localidad=?, email=?, telefono=?, aspiraciones=?,
-					observaciones=?, password=?, imagen=? WHERE id=?;");
-				$consulta->bind_param("ssssssssisssis",$usuario->rol,$usuario->nombre, $usuario->apellido1, $usuario->apellido2, 
-					$usuario->DNI,$usuario->fecha_nacimiento,$usuario->localidad,$usuario->email, $usuario->telefono,
-					$usuario->aspiraciones, $usuario->observaciones, $usuario->password,$usuario->id,$usuario->imagen);
-				
-				$consulta->execute();
+				$consulta=$this->conexion->prepare("UPDATE usuario SET rol=?, nombre=?, apellido1=?, apellido2=?, DNI=?, fecha_nacimiento=?, localidad=?, email=?, telefono=?, aspiraciones=?, 	observaciones=?, password=?, imagen=? WHERE id=?;");
+				$consulta->bind_param("ssssssssissssi",$usuario->rol,$usuario->nombre, $usuario->apellido1, $usuario->apellido2, 
+					$usuario->DNI,$usuario->fecha_nacimiento,$usuario->localidad,$usuario->email, intval($usuario->telefono),
+					$usuario->aspiraciones, $usuario->observaciones, $usuario->password,$usuario->imagen,$usuario->id);
 
+				$consulta->execute();
+				
 				$exito=$consulta->affected_rows != -1;
 				/*
 					Para actualizar los gustos del usuario, lo más fácil es borrar todos
@@ -596,7 +593,7 @@
 
 		public function getUsuario($id_usuario){
 			$usuario=new Usuario;
-			$consulta=$this->conexion->prepare("SELECT rol,nombre,apellido1,apellido2,DNI,fecha_nacimiento,localidad,email,telefono,aspiraciones,observaciones,password,imagen 
+			$consulta=$this->conexion->prepare("SELECT id,rol,nombre,apellido1,apellido2,DNI,fecha_nacimiento,localidad,email,telefono,aspiraciones,observaciones,password,imagen 
 												FROM usuario WHERE id=?;");
 			$consulta->bind_param("i",$id_usuario);
 			$consulta->execute();
