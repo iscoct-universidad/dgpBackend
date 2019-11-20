@@ -10,6 +10,7 @@
 		public $puntuacion;
 		public $cerrada;
 		public $imagen;
+		public $id_usuario_propone;
 		public $etiquetas = array();
 		
 
@@ -51,6 +52,7 @@
 			$this->puntuacion=$associativeArray['puntuacion'];
 			$this->cerrada=$associativeArray['cerrada'];
 			$this->imagen=$associativeArray['imagen'];
+			$this->id_usuario_propone=$associativeArray['id_usuario_propone'];
 		}
 	}
 ?>

@@ -100,6 +100,16 @@ $app -> get('/api/usuario/{id}', function (Request $request, Response $response,
 	return setHeader($request, $response);
 });
 
+$app -> get('/api/usuarioNombre/{id}', function (Request $request, Response $response, $args) {
+	$conexion_bd = new gestorBD();
+
+    $usuario=$conexion_bd->getUsuarioNombre($args['id']);
+	
+	$response = setResponse($response, array("usuario" => $usuario), 200);
+	
+	return setHeader($request, $response);
+});
+
 $app -> post('/api/usuario', function (Request $request,Response $response, $args) {
     $comparison = hasBodyJson($request);
     if ($comparison) {
@@ -144,10 +154,10 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
 
     $post=$request->getParsedBody();
     $new_gustos = array();
-
 	if (array_key_exists('gustos', $post)) {
-		for ($i=0;$i<count($post['gustos']);$i++) {
-		    $new_gustos[]=$post['gustos'][$i];
+        $gustos_post = json_decode($post['gustos'],true);
+		for ($i=0;$i<count($gustos_post['gustos']);$i++) {
+		    $new_gustos[]=$gustos_post['gustos'][$i];
 		}
     }
     $new_user= new Usuario;
@@ -163,30 +173,34 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
     return setHeader($request, $response);
 });
 
-$app -> put('/api/usuario', function (Request $request, Response $response, $args) {
+$app -> post('/api/usuario/modificar', function (Request $request, Response $response, $args) {
         $conexion_bd= new gestorBD();
-
         $uploadFiles = $request->getUploadedFiles();
-        $imageFile = $uploadFiles['imagen'];
+        if (count($uploadFiles) > 0) {
+            $imageFile = $uploadFiles['imagen'];
     
-        if ($imageFile->getError() === UPLOAD_ERR_OK){
-            $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
-        }
-        else{
-            $imagePath=null;
+            if ($imageFile->getError() === UPLOAD_ERR_OK){
+                $imagePath =moveUploadFile($this->get('upload_directory'),$imageFile);
+            }
+            else{
+                $imagePath = '';
+            }
+        } else {
+            $imagePath = '';
         }
 
-        $put=$request->getParsedBody();
+        $post=$request->getParsedBody();
         $new_gustos = array();
         if (array_key_exists('gustos', $post)) {
-            for ($i=0;$i<count($post['gustos']);$i++) {
-                $new_gustos[]=$post['gustos'][$i];
+            $gustos_post = json_decode($post['gustos'],true);
+            for ($i=0;$i<count($gustos_post['gustos']);$i++) {
+                $new_gustos[]=$gustos_post['gustos'][$i];
             }
         }
 
         $new_user= new Usuario;
-        $new_user->construct2($put['rol'],$put['nombre'], $put['apellido1'], $put['apellido2'], $put['DNI'], $put['fecha_nacimiento'], $put['localidad'],
-                             $put['email'], $put['telefono'], $put['aspiraciones'], $put['observaciones'],$put['password'],$imagePath,$new_gustos);
+        $new_user->construct2($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
+                             $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
         $new_user->id=$_SESSION['id_usuario'];
 
         $exito = $conexion_bd->updateUsuario($new_user);
@@ -214,12 +228,21 @@ $app -> delete('/api/usuario/{id}', function (Request $request, Response $respon
     return setHeader($request, $response);
 });
 
-//Falta devolver primero las que coinciden con los gustos del usuario.
 $app -> get('/api/actividades', function (Request $request, Response $response, $args) {
     
     $actividades=array();
     $conexion_bd= new gestorBD();
     $actividades=$conexion_bd->getActividades();
+    $response = setResponse($response,array("actividades"=>$actividades), 200);
+
+    return setHeader($request, $response);
+});
+
+$app -> get('/api/actividades/terminadas', function (Request $request, Response $response, $args) {
+    
+    $actividades=array();
+    $conexion_bd= new gestorBD();
+    $actividades=$conexion_bd->getActividadesTerminadas();
     $response = setResponse($response,array("actividades"=>$actividades), 200);
 
     return setHeader($request, $response);
@@ -261,17 +284,22 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 		else{
 		    $imagePath=null;
 		}
-
+    }
+    else{
+        $imagePath=null;
+    }
 		$post=$request->getParsedBody();
 		$actividad=new Actividad;
 		$conexion_bd= new gestorBD();
 		$actividad->nombre=$post['nombre'];
-		$actividad->descripcion=$post['descripcion'];
+        $actividad->descripcion=$post['descripcion'];
+        
 		$actividad->imagen=$imagePath;
         $new_etiquetas = array();
         if (array_key_exists('etiquetas', $post)) {
-            for ($i=0;$i<count($post['etiquetas']);$i++){
-                $new_etiquetas[]=$post['etiquetas'][$i];
+            $etiquetas_post = json_decode($post['etiquetas'],true);
+            for ($i=0;$i<count($etiquetas_post['etiquetas']);$i++){
+                $new_etiquetas[]=$etiquetas_post['etiquetas'][$i];
             }
         }
 		$actividad->etiquetas=$new_etiquetas;
@@ -279,10 +307,6 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 		if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
 		else $response = setResponse($response, array('description'=>'No ha sido posible crear la actividad'), 400);
 		$conexion_bd->close();
-    } else {
-    	$response = setResponse($response, array('description' => 'No ha sido posible crear la actividad'), 400);
-    }
-
     return setHeader($request, $response);
 });
 
@@ -358,7 +382,7 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
 });
 
 function moveUploadFile($directory, $uploadedFile){
-    $extendion = pathinfo($uploadedFile->getClientFilename(),PATHINFO_EXTENSION);
+    $extension = pathinfo($uploadedFile->getClientFilename(),PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
     $filename = sprintf('%s.%0,png', $basename, $extension);
 
