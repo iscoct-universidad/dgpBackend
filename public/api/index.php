@@ -381,6 +381,14 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
     return setHeader($request, $response);
 });
 
+$app -> get('/api/buscarUsuario/{keywords}', function (Request $request, Response $response, $args) {
+    $keywords = $args['keywords'];
+    $conexion_bd= new gestorBD();
+    $listaUsuarios = $conexion_bd->buscarUsuarios($keywords);
+    $response = setResponse($response,array('usuarios'=>$listaUsuarios),200);
+    return setHeader($request, $response);
+});
+
 function moveUploadFile($directory, $uploadedFile){
     $extension = pathinfo($uploadedFile->getClientFilename(),PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
