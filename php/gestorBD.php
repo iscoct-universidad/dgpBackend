@@ -612,7 +612,7 @@
 			
 			if ($this->comprobarRolAdministrador($_SESSION['id_usuario'])){
 				$usuarios=array();
-				$consulta=$this->conexion->prepare("SELECT id,nombre,imagen FROM usuario;");
+				$consulta=$this->conexion->prepare("SELECT id,nombre,apellido1,apellido2,imagen FROM usuario;");
 				$consulta->execute();
 				$resultado=$consulta->get_result();
 				while($fila_resultado=$resultado->fetch_assoc()){
@@ -620,6 +620,32 @@
 					$usuario->id=$fila_resultado['id'];
 					$usuario->nombre=$fila_resultado['nombre'];
 					$usuario->imagen=$fila_resultado['imagen'];
+					$usuario->apellido1=$fila_resultado['apellido1'];
+					$usuario->apellido2=$fila_resultado['apellido2'];
+					$usuarios[]=$usuario;
+				}
+				return $usuarios;
+			}
+			else
+				return null;
+		}
+
+		public function buscarUsuarios($keywords){
+			
+			if ($this->comprobarRolAdministrador($_SESSION['id_usuario'])){
+				$usuarios=array();
+				$keywords = '%'.$keywords.'%';
+				$consulta=$this->conexion->prepare("SELECT id,nombre,imagen,apellido1,apellido2 FROM usuario WHERE nombre LIKE ? OR apellido1 LIKE ? OR apellido2 LIKE ?;");
+				$consulta->bind_param("sss",$keywords,$keywords,$keywords);
+				$consulta->execute();
+				$resultado=$consulta->get_result();
+				while($fila_resultado=$resultado->fetch_assoc()){
+					$usuario = new Usuario;
+					$usuario->id=$fila_resultado['id'];
+					$usuario->nombre=$fila_resultado['nombre'];
+					$usuario->imagen=$fila_resultado['imagen'];
+					$usuario->apellido1=$fila_resultado['apellido1'];
+					$usuario->apellido2=$fila_resultado['apellido2'];
 					$usuarios[]=$usuario;
 				}
 				return $usuarios;
