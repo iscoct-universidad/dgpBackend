@@ -16,26 +16,6 @@
 		public $imagen;
 		public $gustos = array();
 
-		/*public function __construct($mail, $conexion){
-			$seleccion = "SELECT * FROM usuarios WHERE email=" . $mail;
-			$resultado = mysqli_query ($conexion, $seleccion);
-			$fila = mysqli_fetch_assoc ($resultado);
-
-			$this->id=$fila['id'];
-			$this->rol=$fila['rol'];
-			$this->nombre=$fila['nombre'];
-			$this->apellido1=$fila['apellido1'];
-			$this->apellido2=$fila['apellido2'];
-			$this->DNI=$fila['DNI'];
-			$this->fecha_nacimiento=$fila['fecha_nacimiento'];
-			$this->localidad=$fila['localidad'];
-			$this->email=$fila['email'];
-			$this->telefono=$fila['telefono'];
-			$this->aspiraciones=$fila['aspiraciones'];
-			$this->observaciones=$fila['observaciones'];
-			$this->password=$fila['password'];
-		}*/
-
 		public function construct2($rol, $nombre, $apellido1, $apellido2, $DNI, $fecha_nacimiento, $localidad, $email, $telefono, $aspiraciones, $observaciones,$password,$imagen,$gustos){
 			$this->rol=$rol;
 			$this->nombre=$nombre;
@@ -51,6 +31,14 @@
 			$this->password=$password;
 			$this->imagen=$imagen;
 			$this->gustos=$gustos;
+		}
+
+		public function construct_participante($id, $rol, $nombre, $apellido1, $apellido2){
+			$this->id=$id;
+			$this->rol=$rol;
+			$this->nombre=$nombre;
+			$this->apellido1=$apellido1;
+			$this->apellido2=$apellido2;
 		}
 	}
 ?>

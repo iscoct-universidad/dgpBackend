@@ -8,6 +8,7 @@ require __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../php/actividad.php';
 require_once __DIR__ . '/../../php/gestorBD.php';
 require_once __DIR__ . '/../../php/usuario.php';
+require_once __DIR__ . '/../../php/mensajeChat.php';
 
 $container = new Container();
 $container->set('upload_directory',__DIR__ . '/../images');
@@ -234,7 +235,7 @@ $app -> get('/api/actividades', function (Request $request, Response $response, 
     $conexion_bd= new gestorBD();
     $actividades=$conexion_bd->getActividades();
     $response = setResponse($response,array("actividades"=>$actividades), 200);
-
+    $conexion_bd->close();
     return setHeader($request, $response);
 });
 
@@ -244,17 +245,22 @@ $app -> get('/api/actividades/terminadas', function (Request $request, Response 
     $conexion_bd= new gestorBD();
     $actividades=$conexion_bd->getActividadesTerminadas();
     $response = setResponse($response,array("actividades"=>$actividades), 200);
-
+    $conexion_bd->close();
     return setHeader($request, $response);
 });
 
 $app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $conexion_bd= new gestorBD();
-    $actividad->id_actividad=$args[id];
-    $actividad=$conexion_bd->getActividad($actividad);
-    $response = setResponse($response,array('actividad'=>$actividad), 200);
-    $conexion_bd->close();
+    if ($conexion_bd->comprobarRolAdministrador($_SESSION['id_usuario'])){
+        $actividad->id_actividad=$args[id];
+        $actividad=$conexion_bd->getActividad($actividad);
+        $response = setResponse($response,array('actividad'=>$actividad), 200);
+        $conexion_bd->close();
+    }
+    else{
+        $response = setResponse ($response,array('description'=>'No tiene permisos de administracion'), 400);
+    }
     return setHeader($request, $response);
 });
 
@@ -293,7 +299,7 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 		$conexion_bd= new gestorBD();
 		$actividad->nombre=$post['nombre'];
         $actividad->descripcion=$post['descripcion'];
-        
+        $actividad->tipo=$post['tipo'];
 		$actividad->imagen=$imagePath;
         $new_etiquetas = array();
         if (array_key_exists('etiquetas', $post)) {
@@ -310,6 +316,37 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
     return setHeader($request, $response);
 });
 
+$app->get('/api/actividades/chat/{id}', function (Request $request, Response $response, $args) {
+    $actividad = new Actividad;
+    $conexion_bd= new gestorBD();
+    $actividad->id_actividad=$args['id'];
+    $actividad = $conexion_bd->getChat($actividad);
+    $response = setResponse($response,array('chat'=>$actividad->mensajes_chat),200);
+    return setHeader($request, $response);
+});
+
+$app->post('/api/actividades/chat/{id}', function (Request $request, Response $response, $args) {
+    $comparison = hasBodyJson($request);
+    if ($comparison) {
+        $response = setResponse($response, array('description' =>'El cuerpo no contiene json'), 400);
+    } 
+    else {
+        $post=$request->getBody();
+        $post=json_decode($post,true);
+        $mensajeChat=new MensajeChat;
+        $conexion_bd= new gestorBD();
+        $mensajeChat->id_actividad=$args['id'];
+        $mensajeChat->contenido=$post['contenido'];
+        $exito=$conexion_bd->publicarMensaje($mensajeChat);
+        if ($exito)
+            $response = setResponse($response,array('description' =>'OK'), 200);
+        else
+            $response = setResponse($response,array('description' =>'No se pudo enviar el mensaje'), 400);
+    }
+    return setHeader($request, $response);
+});
+
+/*
 $app -> put('/api/actividades/proponerFechaLocalizacion/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
@@ -356,6 +393,20 @@ $app -> put('/api/actividades/confirmarFechaLocalizacion/{id}', function (Reques
 
     return setHeader($request, $response);
 });
+*/
+
+$app -> put('/api/actividades/cerrar/{id}', function (Request $request, Response $response, $args) {
+    $actividad = new Actividad;
+    $conexion_bd= new gestorBD();
+    $actividad->id_actividad=$args['id'];
+    $exito=$conexion_bd->cerrarActividad($actividad);
+    if ($exito)
+        $response = setResponse($response, array('description'=>'OK'), 200);
+    else
+        $response = setResponse($response, array('description'=>'No pudo cerrarse la actividad'), 400);
+    $conexion_bd->close();
+    return setHeader($request, $response);
+});
 
 $app -> put('/api/actividades/valorar/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
@@ -368,8 +419,8 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
         $actividad=new Actividad;
         $conexion_bd= new gestorBD();
         $actividad->id_actividad=$args['id'];
-        $actividad->puntuacion=$put['puntuacion'];
-        $exito = $conexion_bd->valorar($actividad);
+        $puntuacion=$put['puntuacion'];
+        $exito = $conexion_bd->valorar($actividad,$puntuacion);
         if ($exito){
             $response = setResponse($response,array( 'description'=>'OK'), 200);
         }
