@@ -420,7 +420,8 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
         $conexion_bd= new gestorBD();
         $actividad->id_actividad=$args['id'];
         $puntuacion=$put['puntuacion'];
-        $exito = $conexion_bd->valorar($actividad,$puntuacion);
+        $texto_valoracoin=$put['texto_valoracion'];
+        $exito = $conexion_bd->valorar($actividad,$puntuacion,$texto_valoracion);
         if ($exito){
             $response = setResponse($response,array( 'description'=>'OK'), 200);
         }

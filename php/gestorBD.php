@@ -358,7 +358,7 @@
 		}
 		*/
 
-		public function valorar($actividad,$puntuacion){
+		public function valorar($actividad,$puntuacion,$texto_valoracion){
 			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
 			$consulta->bind_param("i",$_SESSION['id_usuario']);
 			$consulta->execute();
@@ -370,12 +370,12 @@
 				$consultaTipoActividad->execute();
 				$filaTipo = $consultaTipoActividad->get_result()->fetch_assoc();
 				if($filaTipo['tipo']=='pareja'){
-					$consulta=$this->conexion->prepare("UPDATE participantes_pareja SET puntuacion = ? WHERE id_socio=? AND id_actividad=?");
-					$consulta->bind_param("iii",$puntuacion,$_SESSION['id_usuario'],$actividad->id_actividad);
+					$consulta=$this->conexion->prepare("UPDATE participantes_pareja SET puntuacion = ?, texto_valoracion=? WHERE id_socio=? AND id_actividad=?");
+					$consulta->bind_param("isii",$puntuacion,$texto_valoracion,$_SESSION['id_usuario'],$actividad->id_actividad);
 				}
 				else if ($filaTipo['tipo']=='grupal'){
-					$consulta=$this->conexion->prepare("UPDATE participantes_grupal SET puntuacion = ? WHERE id_participante=? AND id_actividad=?");
-					$consulta->bind_param("iii",$puntuacion,$_SESSION['id_usuario'],$actividad->id_actividad);
+					$consulta=$this->conexion->prepare("UPDATE participantes_grupal SET puntuacion = ?, texto_valoracion=? WHERE id_participante=? AND id_actividad=?");
+					$consulta->bind_param("isii",$puntuacion,$texto_valoracion,$_SESSION['id_usuario'],$actividad->id_actividad);
 				}
 
 				$consulta->execute();
@@ -710,9 +710,9 @@
 		public function getChat($actividad){
 			if ($this->comprobarRolAdministrador($_SESSION['id_usuario']) || $this->participaEnActividad($actividad) ){
 				$mensajes_chat=array();
-				$consulta3=$this->conexion->prepare("SELECT id_mensaje, id_actividad, id_participante, fecha, tipo, contenido
-													FROM mensajes_chat 
-													WHERE id_actividad=?;");
+				$consulta3=$this->conexion->prepare("SELECT id_mensaje, id_actividad, nombre,apellido1,apellido2 fecha, tipo, contenido
+													FROM mensajes_chat,usuario
+													WHERE id_actividad=? AND mensajes_chat.id_participante=usuario.id;");
 				$consulta3->bind_param("i",$actividad->id_actividad);
 				$consulta3->execute();
 				$resultado3=$consulta3->get_result();									
