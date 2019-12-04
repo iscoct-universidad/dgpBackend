@@ -11,6 +11,7 @@
 		public $etiquetas = array();
 		public $participantes = array();
 		public $mensajes_chat = array();
+		public $valoraciones = array();
 		public $tipo;
 
 		public function construct2($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion,$cerrada){

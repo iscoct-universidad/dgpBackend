@@ -6,6 +6,7 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../php/actividad.php';
+require_once __DIR__ . '/../../php/valoracion.php';
 require_once __DIR__ . '/../../php/gestorBD.php';
 require_once __DIR__ . '/../../php/usuario.php';
 require_once __DIR__ . '/../../php/mensajeChat.php';
@@ -123,8 +124,8 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
         $post=json_decode($post,true);
         $user->email = $post['email'];
         $user->password = $post['password'];
-        $exito = $conexion_bd->identificarUsuario($user);
-        if ($exito){
+        $usuario = $conexion_bd->identificarUsuario($user);
+        if ($usuario!=false){
             $response = setResponse($response, array('id_usuario' => $_SESSION['id_usuario'],'description' => 'OK'), 200);
         }
         else
@@ -249,11 +250,30 @@ $app -> get('/api/actividades/terminadas', function (Request $request, Response 
     return setHeader($request, $response);
 });
 
+$app -> get('/api/actividades/propias', function (Request $request, Response $response, $args) {
+    
+    $actividades=array();
+    $conexion_bd= new gestorBD();
+    $actividades=$conexion_bd->getActividadesPropias();
+    $response = setResponse($response,array("actividades"=>$actividades), 200);
+    $conexion_bd->close();
+    return setHeader($request, $response);
+});
+
+$app -> get('/api/actividades/usuario/{id}', function (Request $request, Response $response, $args) {
+    $actividades=array();
+    $conexion_bd= new gestorBD();
+    $actividades=$conexion_bd->getActividadesUsuario($args['id']);
+    $response = setResponse($response,array("actividades"=>$actividades), 200);
+    $conexion_bd->close();
+    return setHeader($request, $response);
+});
+
 $app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $conexion_bd= new gestorBD();
     if ($conexion_bd->comprobarRolAdministrador($_SESSION['id_usuario'])){
-        $actividad->id_actividad=$args[id];
+        $actividad->id_actividad=$args['id'];
         $actividad=$conexion_bd->getActividad($actividad);
         $response = setResponse($response,array('actividad'=>$actividad), 200);
         $conexion_bd->close();
@@ -300,7 +320,13 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 		$actividad->nombre=$post['nombre'];
         $actividad->descripcion=$post['descripcion'];
         $actividad->tipo=$post['tipo'];
-		$actividad->imagen=$imagePath;
+
+        if (empty($post['fecha']) || $post['fecha']=='') $post['fecha']=null;
+        $actividad->fecha=$post['fecha'];
+        if (empty($post['localizacion']) || $post['localizacion']=='') $post['localizacion']=null;
+        $actividad->localizacion=$post['localizacion'];
+        $actividad->imagen=$imagePath;
+        print_r($actividad);
         $new_etiquetas = array();
         if (array_key_exists('etiquetas', $post)) {
             $etiquetas_post = json_decode($post['etiquetas'],true);
@@ -396,15 +422,29 @@ $app -> put('/api/actividades/confirmarFechaLocalizacion/{id}', function (Reques
 */
 
 $app -> put('/api/actividades/cerrar/{id}', function (Request $request, Response $response, $args) {
-    $actividad = new Actividad;
-    $conexion_bd= new gestorBD();
-    $actividad->id_actividad=$args['id'];
-    $exito=$conexion_bd->cerrarActividad($actividad);
-    if ($exito)
-        $response = setResponse($response, array('description'=>'OK'), 200);
-    else
-        $response = setResponse($response, array('description'=>'No pudo cerrarse la actividad'), 400);
-    $conexion_bd->close();
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
+    } else {
+        $put=$request->getBody();
+        $put=json_decode($put,true);
+
+        $actividad = new Actividad;
+        $conexion_bd= new gestorBD();
+        $actividad->id_actividad=$args['id'];
+
+        if (empty($put['fecha']) || $put['fecha']=='') $put['fecha']=null;
+        $actividad->fecha=$put['fecha'];
+        if (empty($put['localizacion']) || $put['localizacion']=='') $put['localizacion']=null;
+        $actividad->localizacion=$put['localizacion'];
+        $exito=$conexion_bd->cerrarActividad($actividad);
+        if ($exito)
+            $response = setResponse($response, array('description'=>'OK'), 200);
+        else
+            $response = setResponse($response, array('description'=>'No pudo cerrarse la actividad'), 400);
+        $conexion_bd->close();
+    }
     return setHeader($request, $response);
 });
 
@@ -420,7 +460,7 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
         $conexion_bd= new gestorBD();
         $actividad->id_actividad=$args['id'];
         $puntuacion=$put['puntuacion'];
-        $texto_valoracoin=$put['texto_valoracion'];
+        $texto_valoracion=$put['texto_valoracion'];
         $exito = $conexion_bd->valorar($actividad,$puntuacion,$texto_valoracion);
         if ($exito){
             $response = setResponse($response,array( 'description'=>'OK'), 200);
