@@ -1,34 +1,18 @@
 <?php
 	class Actividad{
 		public $id_actividad;
-		public $id_voluntario;
-		public $id_socio;
 		public $nombre;
 		public $fecha;
 		public $localizacion;
 		public $descripcion;
-		public $puntuacion;
 		public $cerrada;
 		public $imagen;
-		public $id_usuario_propone;
+		public $id_creador;
 		public $etiquetas = array();
-		
-
-		/*public function __construct($id, $conexion){
-			$seleccion = "SELECT * FROM actividad WHERE id_actividad=" . $id;
-			$resultado = mysqli_query ($conexion, $seleccion);
-			$fila = mysqli_fetch_assoc ($resultado);
-
-			$this->id_actividad=$fila['id_actividad'];
-			$this->id_voluntario=$fila['id_voluntario'];
-			$this->id_socio=$fila['id_socio'];
-			$this->nombre=$fila['nombre'];
-			$this->fecha=$fila['fecha'];
-			$this->localizacion=$fila['localizacion'];
-			$this->descripcion=$fila['descripcion'];
-			$this->puntuacion=$fila['puntuacion'];
-			$this->cerrada=$fila['cerrada'];
-		}*/
+		public $participantes = array();
+		public $mensajes_chat = array();
+		public $valoraciones = array();
+		public $tipo;
 
 		public function construct2($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion,$cerrada){
 			$this->id_actividad=$id_actividad;
@@ -43,16 +27,14 @@
 		}
 		public function constructFromAssociativeArray($associativeArray){
 			$this->id_actividad=$associativeArray['id_actividad'];
-			$this->id_voluntario=$associativeArray['id_voluntario'];
-			$this->id_socio=$associativeArray['id_socio'];
 			$this->nombre=$associativeArray['nombre'];
 			$this->fecha=$associativeArray['fecha'];
 			$this->localizacion=$associativeArray['localizacion'];
 			$this->descripcion=$associativeArray['descripcion'];
-			$this->puntuacion=$associativeArray['puntuacion'];
+			$this->id_creador=$associativeArray['id_creador'];
 			$this->cerrada=$associativeArray['cerrada'];
 			$this->imagen=$associativeArray['imagen'];
-			$this->id_usuario_propone=$associativeArray['id_usuario_propone'];
+			$this->tipo=$associativeArray['tipo'];
 		}
 	}
 ?>

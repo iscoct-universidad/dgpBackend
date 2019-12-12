@@ -6,8 +6,10 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../php/actividad.php';
+require_once __DIR__ . '/../../php/valoracion.php';
 require_once __DIR__ . '/../../php/gestorBD.php';
 require_once __DIR__ . '/../../php/usuario.php';
+require_once __DIR__ . '/../../php/mensajeChat.php';
 
 $container = new Container();
 $container->set('upload_directory',__DIR__ . '/../images');
@@ -122,8 +124,8 @@ $app -> post('/api/usuario', function (Request $request,Response $response, $arg
         $post=json_decode($post,true);
         $user->email = $post['email'];
         $user->password = $post['password'];
-        $exito = $conexion_bd->identificarUsuario($user);
-        if ($exito){
+        $usuario = $conexion_bd->identificarUsuario($user);
+        if ($usuario!=false){
             $response = setResponse($response, array('id_usuario' => $_SESSION['id_usuario'],'description' => 'OK'), 200);
         }
         else
@@ -234,7 +236,7 @@ $app -> get('/api/actividades', function (Request $request, Response $response, 
     $conexion_bd= new gestorBD();
     $actividades=$conexion_bd->getActividades();
     $response = setResponse($response,array("actividades"=>$actividades), 200);
-
+    $conexion_bd->close();
     return setHeader($request, $response);
 });
 
@@ -244,14 +246,33 @@ $app -> get('/api/actividades/terminadas', function (Request $request, Response 
     $conexion_bd= new gestorBD();
     $actividades=$conexion_bd->getActividadesTerminadas();
     $response = setResponse($response,array("actividades"=>$actividades), 200);
+    $conexion_bd->close();
+    return setHeader($request, $response);
+});
 
+$app -> get('/api/actividades/propias', function (Request $request, Response $response, $args) {
+    
+    $actividades=array();
+    $conexion_bd= new gestorBD();
+    $actividades=$conexion_bd->getActividadesPropias();
+    $response = setResponse($response,array("actividades"=>$actividades), 200);
+    $conexion_bd->close();
+    return setHeader($request, $response);
+});
+
+$app -> get('/api/actividades/usuario/{id}', function (Request $request, Response $response, $args) {
+    $actividades=array();
+    $conexion_bd= new gestorBD();
+    $actividades=$conexion_bd->getActividadesUsuario($args['id']);
+    $response = setResponse($response,array("actividades"=>$actividades), 200);
+    $conexion_bd->close();
     return setHeader($request, $response);
 });
 
 $app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $conexion_bd= new gestorBD();
-    $actividad->id_actividad=$args[id];
+    $actividad->id_actividad=$args['id'];
     $actividad=$conexion_bd->getActividad($actividad);
     $response = setResponse($response,array('actividad'=>$actividad), 200);
     $conexion_bd->close();
@@ -276,12 +297,15 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
     $uploadFiles = $request->getUploadedFiles();
 
     if (! empty($uploadFiles)) {
+        echo 'entra al if';
 		$imageFile = $uploadFiles['imagen'];
 
 		if ($imageFile->getError() === UPLOAD_ERR_OK){
+            echo 'segundo if';
 		    $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
 		}
 		else{
+            echo $imageFile->getError();
 		    $imagePath=null;
 		}
     }
@@ -293,8 +317,14 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 		$conexion_bd= new gestorBD();
 		$actividad->nombre=$post['nombre'];
         $actividad->descripcion=$post['descripcion'];
-        
-		$actividad->imagen=$imagePath;
+        $actividad->tipo=$post['tipo'];
+
+        if (empty($post['fecha']) || $post['fecha']=='') $post['fecha']=null;
+        $actividad->fecha=$post['fecha'];
+        if (empty($post['localizacion']) || $post['localizacion']=='') $post['localizacion']=null;
+        $actividad->localizacion=$post['localizacion'];
+        $actividad->imagen=$imagePath;
+        print_r($actividad);
         $new_etiquetas = array();
         if (array_key_exists('etiquetas', $post)) {
             $etiquetas_post = json_decode($post['etiquetas'],true);
@@ -310,6 +340,37 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
     return setHeader($request, $response);
 });
 
+$app->get('/api/actividades/chat/{id}', function (Request $request, Response $response, $args) {
+    $actividad = new Actividad;
+    $conexion_bd= new gestorBD();
+    $actividad->id_actividad=$args['id'];
+    $actividad = $conexion_bd->getChat($actividad);
+    $response = setResponse($response,array('chat'=>$actividad->mensajes_chat),200);
+    return setHeader($request, $response);
+});
+
+$app->post('/api/actividades/chat/{id}', function (Request $request, Response $response, $args) {
+    $comparison = hasBodyJson($request);
+    if ($comparison) {
+        $response = setResponse($response, array('description' =>'El cuerpo no contiene json'), 400);
+    } 
+    else {
+        $post=$request->getBody();
+        $post=json_decode($post,true);
+        $mensajeChat=new MensajeChat;
+        $conexion_bd= new gestorBD();
+        $mensajeChat->id_actividad=$args['id'];
+        $mensajeChat->contenido=$post['contenido'];
+        $exito=$conexion_bd->publicarMensaje($mensajeChat);
+        if ($exito)
+            $response = setResponse($response,array('description' =>'OK'), 200);
+        else
+            $response = setResponse($response,array('description' =>'No se pudo enviar el mensaje'), 400);
+    }
+    return setHeader($request, $response);
+});
+
+/*
 $app -> put('/api/actividades/proponerFechaLocalizacion/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
 
@@ -356,6 +417,34 @@ $app -> put('/api/actividades/confirmarFechaLocalizacion/{id}', function (Reques
 
     return setHeader($request, $response);
 });
+*/
+
+$app -> put('/api/actividades/cerrar/{id}', function (Request $request, Response $response, $args) {
+    $comparison = hasBodyJson($request);
+
+    if ($comparison) {
+        $response = setReponse($response, array('description' =>'El cuerpo no contiene json'), 400);
+    } else {
+        $put=$request->getBody();
+        $put=json_decode($put,true);
+
+        $actividad = new Actividad;
+        $conexion_bd= new gestorBD();
+        $actividad->id_actividad=$args['id'];
+
+        if (empty($put['fecha']) || $put['fecha']=='') $put['fecha']=null;
+        $actividad->fecha=$put['fecha'];
+        if (empty($put['localizacion']) || $put['localizacion']=='') $put['localizacion']=null;
+        $actividad->localizacion=$put['localizacion'];
+        $exito=$conexion_bd->cerrarActividad($actividad);
+        if ($exito)
+            $response = setResponse($response, array('description'=>'OK'), 200);
+        else
+            $response = setResponse($response, array('description'=>'No pudo cerrarse la actividad'), 400);
+        $conexion_bd->close();
+    }
+    return setHeader($request, $response);
+});
 
 $app -> put('/api/actividades/valorar/{id}', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
@@ -368,8 +457,9 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
         $actividad=new Actividad;
         $conexion_bd= new gestorBD();
         $actividad->id_actividad=$args['id'];
-        $actividad->puntuacion=$put['puntuacion'];
-        $exito = $conexion_bd->valorar($actividad);
+        $puntuacion=$put['puntuacion'];
+        $texto_valoracion=$put['texto_valoracion'];
+        $exito = $conexion_bd->valorar($actividad,$puntuacion,$texto_valoracion);
         if ($exito){
             $response = setResponse($response,array( 'description'=>'OK'), 200);
         }
@@ -389,11 +479,13 @@ $app -> get('/api/buscarUsuario/{keywords}', function (Request $request, Respons
     return setHeader($request, $response);
 });
 
+//puede ser necesario aumentar upload_max_filesize y post_max_size en php.ini
 function moveUploadFile($directory, $uploadedFile){
     $extension = pathinfo($uploadedFile->getClientFilename(),PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
-    $filename = sprintf('%s.%0,png', $basename, $extension);
+    $filename = sprintf('%s.%s', $basename, $extension);
 
+    echo 'llega a servidor '.$filename;
     $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
 
     return $filename;
