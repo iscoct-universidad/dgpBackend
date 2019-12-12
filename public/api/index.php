@@ -272,15 +272,10 @@ $app -> get('/api/actividades/usuario/{id}', function (Request $request, Respons
 $app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $conexion_bd= new gestorBD();
-    if ($conexion_bd->comprobarRolAdministrador($_SESSION['id_usuario'])){
-        $actividad->id_actividad=$args['id'];
-        $actividad=$conexion_bd->getActividad($actividad);
-        $response = setResponse($response,array('actividad'=>$actividad), 200);
-        $conexion_bd->close();
-    }
-    else{
-        $response = setResponse ($response,array('description'=>'No tiene permisos de administracion'), 400);
-    }
+    $actividad->id_actividad=$args['id'];
+    $actividad=$conexion_bd->getActividad($actividad);
+    $response = setResponse($response,array('actividad'=>$actividad), 200);
+    $conexion_bd->close();
     return setHeader($request, $response);
 });
 
@@ -302,12 +297,15 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
     $uploadFiles = $request->getUploadedFiles();
 
     if (! empty($uploadFiles)) {
+        echo 'entra al if';
 		$imageFile = $uploadFiles['imagen'];
 
 		if ($imageFile->getError() === UPLOAD_ERR_OK){
+            echo 'segundo if';
 		    $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
 		}
 		else{
+            echo $imageFile->getError();
 		    $imagePath=null;
 		}
     }
@@ -481,11 +479,13 @@ $app -> get('/api/buscarUsuario/{keywords}', function (Request $request, Respons
     return setHeader($request, $response);
 });
 
+//puede ser necesario aumentar upload_max_filesize y post_max_size en php.ini
 function moveUploadFile($directory, $uploadedFile){
     $extension = pathinfo($uploadedFile->getClientFilename(),PATHINFO_EXTENSION);
     $basename = bin2hex(random_bytes(8));
-    $filename = sprintf('%s.%0,png', $basename, $extension);
+    $filename = sprintf('%s.%s', $basename, $extension);
 
+    echo 'llega a servidor '.$filename;
     $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
 
     return $filename;

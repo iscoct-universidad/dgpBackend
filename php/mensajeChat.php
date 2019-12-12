@@ -1,7 +1,8 @@
 <?php
 	class MensajeChat{
         public $id_mensaje;
-        public $id_actividad;
+		public $id_actividad;
+		public $id_participante;
 		public $nombre;
 		public $apellido1;
 		public $apellido2;
@@ -18,6 +19,7 @@
 			$this->fecha=$associativeArray['fecha'];
 			$this->tipo=$associativeArray['tipo'];
 			$this->contenido=$associativeArray['contenido'];
+			$this->id_participante=$associativeArray['id_participante'];
 		}
 	}
 ?>

@@ -430,7 +430,7 @@
 			$consulta->bind_param("i",$actividad->id_actividad);
 			$consulta->execute();
 			$fila=$consulta->get_result()->fetch_assoc();
-			$actividad->constructFromAssociativeArray($fila_resultado);
+			$actividad->constructFromAssociativeArray($fila);
 			$actividades=array();
 			$actividades[]=$actividad;
 			$actividades=$this->aniadirEtiquetasParticipantes($actividades);
@@ -737,7 +737,7 @@
 
 		public function getUsuarioNombre($id_usuario){
 			$usuario=new Usuario;
-			$consulta=$this->conexion->prepare("SELECT nombre,apellido1,apellido2 FROM usuario WHERE id=?;");
+			$consulta=$this->conexion->prepare("SELECT rol,nombre,apellido1,apellido2 FROM usuario WHERE id=?;");
 			$consulta->bind_param("i",$id_usuario);
 			$consulta->execute();
 			$resultado=$consulta->get_result();
@@ -745,6 +745,7 @@
 			$usuario->nombre=$fila_resultado['nombre'];
 			$usuario->apellido1=$fila_resultado['apellido1'];
 			$usuario->apellido2=$fila_resultado['apellido2'];
+			$usuario->rol=$fila_resultado['rol'];
 			return $usuario;
 		}
 
@@ -821,9 +822,9 @@
 		public function getChat($actividad){
 			if ($this->comprobarRolAdministrador($_SESSION['id_usuario']) || $this->participaEnActividad($actividad) ){
 				$mensajes_chat=array();
-				$consulta3=$this->conexion->prepare("SELECT id_mensaje, id_actividad, nombre,apellido1,apellido2, fecha, tipo, contenido
+				$consulta3=$this->conexion->prepare("SELECT id_mensaje, id_actividad,id_participante, nombre,apellido1,apellido2, fecha, tipo, contenido
 													FROM mensajes_chat,usuario
-													WHERE id_actividad=? AND mensajes_chat.id_participante=usuario.id;");
+													WHERE id_actividad=? AND mensajes_chat.id_participante=usuario.id ORDER BY fecha ASC;");
 				$consulta3->bind_param("i",$actividad->id_actividad);
 				$consulta3->execute();
 				$resultado3=$consulta3->get_result();									
