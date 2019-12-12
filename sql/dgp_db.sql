@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 29-11-2019 a las 13:42:23
+-- Tiempo de generación: 12-12-2019 a las 15:11:06
 -- Versión del servidor: 5.7.28-0ubuntu0.18.04.4
 -- Versión de PHP: 7.2.24-0ubuntu0.18.04.1
 
@@ -45,12 +45,43 @@ CREATE TABLE `actividad` (
 INSERT INTO `actividad` (`id_actividad`, `nombre`, `fecha`, `localizacion`, `id_creador`, `descripcion`, `imagen`, `cerrada`, `tipo`) VALUES
 (49, 'actividad pareja', NULL, NULL, 1, 'esta es de pareja', NULL, 0, 'pareja'),
 (50, 'actividad grupal', NULL, NULL, 3, 'esto es una actividad grupal', NULL, 0, 'grupal'),
-(51, 'para no apuntarse', NULL, NULL, 3, 'en pareja vacia', NULL, 0, 'pareja'),
+(51, 'para no apuntarse', NULL, NULL, 3, 'en pareja vacia', NULL, 1, 'pareja'),
 (52, 'en pareja de voluntario', NULL, NULL, 3, 'en pareja de voluntario', NULL, 0, 'pareja'),
 (53, 'actividad grupal vacia', NULL, NULL, 3, 'actividad grupal para dejar vacia', NULL, 0, 'grupal'),
-(54, 'esta de pareja de socio para dejar vacia', NULL, NULL, 1, 'esta de pareja de socio para dejar vacia', NULL, 0, 'pareja'),
-(55, 'actividad de prueba 2', NULL, NULL, 1, 'esta es la descripcion de la actividad de prueba, esto es una actividad de prueba.', NULL, 0, 'pareja'),
-(56, 'actividad grupal de prueba', NULL, NULL, 1, 'descripcion grupal', NULL, 0, 'grupal');
+(54, 'esta de pareja de socio para dejar vacia', NULL, NULL, 1, 'esta de pareja de socio para dejar vacia', NULL, 1, 'pareja'),
+(55, 'actividad de prueba 2', NULL, NULL, 1, 'esta es la descripcion de la actividad de prueba, esto es una actividad de prueba.', NULL, 0, 'grupal'),
+(56, 'actividad grupal de prueba', NULL, NULL, 1, 'descripcion grupal', NULL, 0, 'grupal'),
+(62, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(63, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(64, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(65, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', '7d527c4e8650c9af.png', 0, 'pareja'),
+(66, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(67, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(68, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(69, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(70, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(71, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(72, 'prueba v2.0', NULL, NULL, 3, 'esta es la descripcion de la actvidad', NULL, 0, 'pareja'),
+(73, 'jeuf', NULL, 'La calle', 1, 'dkdkd', NULL, 0, 'pareja'),
+(74, 'jeufuwuf', NULL, 'La calle', 1, 'dkdkd', NULL, 0, 'pareja'),
+(75, 'jeufuwuf124', NULL, 'La calle', 1, 'dkdkd', 'e2c39ba4abe33964.png', 0, 'pareja'),
+(76, 'jdkkf', NULL, 'La calle', 1, 'xknwf', NULL, 0, 'pareja'),
+(77, 'jdkfk ', NULL, 'La calle', 1, 'nnnnn', NULL, 0, 'pareja'),
+(78, 'jdkfk ', NULL, 'La calle', 1, 'nnnnn', 'f7bd55f8e22bd539.png', 0, 'pareja'),
+(79, 'jdkf', NULL, 'La calle', 1, 'dkdkdk', NULL, 0, 'pareja'),
+(80, 'jdkfhjj', NULL, 'La calle', 1, 'dkdkdkjkk', '47130b3f1fc706e8.png', 0, 'pareja'),
+(81, 'jfjdj', NULL, 'La calle', 1, 'skndkd', '324333a05db3fc9f.png', 0, 'pareja'),
+(82, 'jfjdj6666', NULL, 'La calle', 1, 'skndkd', 'be72cb090d29c65e.jpg', 0, 'pareja'),
+(83, 'jfjdj6666u883jnf', NULL, 'La calle', 1, 'skndkd', NULL, 0, 'pareja'),
+(84, 'jfjdj6666u883jnf', NULL, 'La calle', 1, 'skndkd', NULL, 0, 'pareja'),
+(85, 'jfjdj6666u883jnf', NULL, 'La calle', 1, 'skndkd', NULL, 0, 'pareja'),
+(86, 'jdjd', NULL, 'La calle', 1, 'kfkf', 'edde61e58cb232d5.png', 0, 'pareja'),
+(87, 'jdjd', NULL, 'La calle', 1, 'kfkf', NULL, 0, 'pareja'),
+(88, 'titulokkkk', NULL, 'La calle', 1, 'kfnfn', 'b02bf0452fc67c53.png', 0, 'pareja'),
+(89, 'titulokkkk1111', NULL, 'La calle', 1, 'kfnfniriginr', NULL, 0, 'pareja'),
+(90, 'titulokkkk1111', NULL, 'La calle', 1, 'kfnfniriginr', NULL, 0, 'pareja'),
+(91, 'actividad 10m', NULL, 'La calle', 1, 'jfkfkdkdm 10m 10m', '777f3ada17ba877f.jpg', 0, 'pareja'),
+(92, 'actividad 10m', NULL, 'La calle', 1, 'jfkfkdkdm 10m 10m', '66edce58a8e03242.jpg', 0, 'pareja');
 
 --
 -- Disparadores `actividad`
@@ -91,7 +122,29 @@ INSERT INTO `actividad_etiquetas` (`id_actividad`, `etiqueta`) VALUES
 (51, 'Compras'),
 (54, 'Deportes'),
 (55, 'etiqueta2'),
+(62, 'etiqueta2'),
+(63, 'etiqueta2'),
+(64, 'etiqueta2'),
+(65, 'etiqueta2'),
+(66, 'etiqueta2'),
+(67, 'etiqueta2'),
+(68, 'etiqueta2'),
+(69, 'etiqueta2'),
+(70, 'etiqueta2'),
+(71, 'etiqueta2'),
+(72, 'etiqueta2'),
 (55, 'gusto1'),
+(62, 'gusto1'),
+(63, 'gusto1'),
+(64, 'gusto1'),
+(65, 'gusto1'),
+(66, 'gusto1'),
+(67, 'gusto1'),
+(68, 'gusto1'),
+(69, 'gusto1'),
+(70, 'gusto1'),
+(71, 'gusto1'),
+(72, 'gusto1'),
 (54, 'Juegos de Mesa');
 
 -- --------------------------------------------------------
@@ -161,7 +214,35 @@ INSERT INTO `mensajes_chat` (`id_mensaje`, `id_actividad`, `id_participante`, `f
 (2, 51, 3, '2019-11-29 17:26:54', 'texto', 'mensaje del socio'),
 (3, 50, 3, '2019-11-30 00:00:00', 'texto', 'mensaje por voluntario en la 50 para que lo vea el socio.'),
 (4, 54, 1, '2019-11-30 00:00:00', 'texto', 'mensaje del socio que NO verá el voluntario'),
-(6, 52, 3, '2019-11-29 12:52:05', 'texto', 'mensaje desde postman');
+(6, 52, 3, '2019-11-29 12:52:05', 'texto', 'mensaje desde postman'),
+(7, 51, 1, '2019-12-04 15:14:54', 'texto', 'Mensaje chat desde Android'),
+(8, 51, 1, '2019-12-04 15:18:15', 'texto', 'Mensaje chat desde Android'),
+(9, 51, 1, '2019-12-04 15:25:19', 'texto', 'Mensaje chat desde Android'),
+(10, 51, 1, '2019-12-04 15:28:03', 'texto', 'Mensaje chat desde Android'),
+(11, 51, 1, '2019-12-04 15:33:04', 'texto', 'Mensaje chat desde Android'),
+(12, 51, 1, '2019-12-04 15:35:32', 'texto', 'Mensaje chat desde Android'),
+(13, 51, 1, '2019-12-04 15:36:16', 'texto', 'Mensaje chat desde Android'),
+(14, 51, 1, '2019-12-04 15:37:39', 'texto', 'Mensaje chat desde Android'),
+(15, 51, 1, '2019-12-05 00:53:36', 'texto', 'Mensaje chat desde Android'),
+(16, 51, 1, '2019-12-05 00:55:28', 'texto', 'Mensaje chat desde Android'),
+(17, 51, 1, '2019-12-05 01:06:38', 'texto', 'Mensaje chat desde Android'),
+(18, 51, 1, '2019-12-05 01:12:09', 'texto', 'Mensaje chat desde Android'),
+(19, 51, 1, '2019-12-05 01:18:43', 'texto', 'Mensaje chat desde Android'),
+(20, 51, 1, '2019-12-05 01:23:30', 'texto', 'Mensaje chat desde Android'),
+(21, 51, 1, '2019-12-05 01:27:05', 'texto', 'Mensaje chat desde Android'),
+(22, 51, 1, '2019-12-05 01:42:49', 'texto', 'Mensaje chat desde Android'),
+(23, 51, 1, '2019-12-05 01:44:53', 'texto', 'Mensaje chat desde Android'),
+(24, 51, 1, '2019-12-05 02:05:34', 'texto', 'Mensaje chat desde Android'),
+(25, 51, 1, '2019-12-05 02:10:02', 'texto', 'Mensaje chat desde Android'),
+(26, 51, 1, '2019-12-05 02:18:24', 'texto', 'Mensaje chat desde Android'),
+(27, 51, 1, '2019-12-05 02:20:06', 'texto', 'Mensaje chat desde Android'),
+(28, 51, 1, '2019-12-05 02:29:02', 'texto', 'Mensaje chat desde Android'),
+(29, 50, 1, '2019-12-12 04:26:15', 'texto', 'mensaje de prueba desde Android'),
+(30, 50, 1, '2019-12-12 04:26:26', 'texto', 'mensaje de prueba desde Android'),
+(31, 50, 1, '2019-12-12 04:26:28', 'texto', 'mensaje de prueba desde Android'),
+(32, 50, 1, '2019-12-12 04:26:33', 'texto', 'mensaje de prueba desde Android'),
+(33, 50, 1, '2019-12-12 04:26:37', 'texto', 'mensaje de prueba desde Android'),
+(34, 72, 3, '2019-12-12 05:00:50', 'texto', 'mensaje de prueba');
 
 -- --------------------------------------------------------
 
@@ -172,17 +253,18 @@ INSERT INTO `mensajes_chat` (`id_mensaje`, `id_actividad`, `id_participante`, `f
 CREATE TABLE `participantes_grupal` (
   `id_actividad` int(11) NOT NULL,
   `id_participante` int(11) NOT NULL,
-  `puntuacion` int(11) DEFAULT NULL
+  `puntuacion` int(11) DEFAULT NULL,
+  `texto_valoracion` varchar(300) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `participantes_grupal`
 --
 
-INSERT INTO `participantes_grupal` (`id_actividad`, `id_participante`, `puntuacion`) VALUES
-(50, 1, NULL),
-(50, 3, NULL),
-(53, 3, NULL);
+INSERT INTO `participantes_grupal` (`id_actividad`, `id_participante`, `puntuacion`, `texto_valoracion`) VALUES
+(50, 1, NULL, NULL),
+(50, 3, NULL, NULL),
+(53, 3, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -194,19 +276,51 @@ CREATE TABLE `participantes_pareja` (
   `id_actividad` int(11) NOT NULL,
   `id_socio` int(11) DEFAULT NULL,
   `id_voluntario` int(11) DEFAULT NULL,
-  `puntuacion` int(11) DEFAULT NULL
+  `puntuacion` int(11) DEFAULT NULL,
+  `texto_valoracion` varchar(300) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `participantes_pareja`
 --
 
-INSERT INTO `participantes_pareja` (`id_actividad`, `id_socio`, `id_voluntario`, `puntuacion`) VALUES
-(49, 1, 3, NULL),
-(51, NULL, 3, NULL),
-(52, 1, 3, NULL),
-(54, 1, NULL, NULL),
-(55, 1, NULL, NULL);
+INSERT INTO `participantes_pareja` (`id_actividad`, `id_socio`, `id_voluntario`, `puntuacion`, `texto_valoracion`) VALUES
+(49, 1, 3, NULL, NULL),
+(51, 1, 3, 4, 'me lo he pasado muy bien'),
+(52, 1, 3, NULL, NULL),
+(54, 1, NULL, NULL, NULL),
+(55, 1, NULL, NULL, NULL),
+(62, NULL, 3, NULL, NULL),
+(63, NULL, 3, NULL, NULL),
+(64, NULL, 3, NULL, NULL),
+(65, NULL, 3, NULL, NULL),
+(66, NULL, 3, NULL, NULL),
+(67, NULL, 3, NULL, NULL),
+(68, NULL, 3, NULL, NULL),
+(69, NULL, 3, NULL, NULL),
+(70, NULL, 3, NULL, NULL),
+(71, NULL, 3, NULL, NULL),
+(72, NULL, 3, NULL, NULL),
+(73, 1, NULL, NULL, NULL),
+(74, 1, NULL, NULL, NULL),
+(75, 1, NULL, NULL, NULL),
+(76, 1, NULL, NULL, NULL),
+(77, 1, NULL, NULL, NULL),
+(78, 1, NULL, NULL, NULL),
+(79, 1, NULL, NULL, NULL),
+(80, 1, NULL, NULL, NULL),
+(81, 1, NULL, NULL, NULL),
+(82, 1, NULL, NULL, NULL),
+(83, 1, NULL, NULL, NULL),
+(84, 1, NULL, NULL, NULL),
+(85, 1, NULL, NULL, NULL),
+(86, 1, NULL, NULL, NULL),
+(87, 1, NULL, NULL, NULL),
+(88, 1, NULL, NULL, NULL),
+(89, 1, NULL, NULL, NULL),
+(90, 1, NULL, NULL, NULL),
+(91, 1, NULL, NULL, NULL),
+(92, 1, NULL, NULL, NULL);
 
 --
 -- Disparadores `participantes_pareja`
@@ -372,7 +486,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id_actividad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id_actividad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
 --
 -- AUTO_INCREMENT de la tabla `gustos`
 --
@@ -382,7 +496,7 @@ ALTER TABLE `gustos`
 -- AUTO_INCREMENT de la tabla `mensajes_chat`
 --
 ALTER TABLE `mensajes_chat`
-  MODIFY `id_mensaje` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_mensaje` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
