@@ -14,7 +14,7 @@
 		public $valoraciones = array();
 		public $tipo;
 
-		public function construct2($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion,$cerrada){
+		public function constructFromArguments($id_actividad, $id_voluntario, $id_socio, $nombre, $fecha, $localizacion, $descripcion, $puntuacion,$cerrada){
 			$this->id_actividad=$id_actividad;
 			$this->id_voluntario=$id_voluntario;
 			$this->id_socio=$id_socio;
