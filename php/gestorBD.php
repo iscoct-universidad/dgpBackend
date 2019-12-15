@@ -5,9 +5,9 @@
 
 		//Fucnión que realiza la conexión con la BD
 		public function __construct(){
-			$host='localhost';
-			$user='dgp_user';
-			$pass='12341234#Sql';
+			$host = "practicasdgpugr.mysql.database.azure.com";
+			$user = "dgp_user@practicasdgpugr";
+			$password = "_PracticasDgp4Curso";
 			$DB='dgp_db';
 			$this->conexion = new mysqli ($host, $user, $pass, $DB);
 			$this->conexion->set_charset("utf8");
