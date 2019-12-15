@@ -123,29 +123,31 @@
 			$fila_resultado = $consulta->get_result()->fetch_assoc();
 			return $fila_resultado['id_actividad'];
 		}
+
 		public function comprobarRolAdministrador($id){
-			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
-			$consulta->bind_param("i",$id);
-			$consulta->execute();
+			$consulta = $this -> conexion -> prepare("SELECT rol FROM usuario WHERE id=?");
+			$consulta -> bind_param("i",$id);
+			$consulta -> execute();
+
 			$fila_resultado = $consulta->get_result()->fetch_assoc();
-			
-			if($fila_resultado['rol'] === "administrador") {
-				return true;
-			} else {
-				return false;
-			}
+
+			return $fila_resultado['rol'] === "administrador";
 		}
 
-		//Función para identificar al usuario
 		public function identificarUsuario ($usuario){
-			$consulta=$this->conexion->prepare("SELECT * FROM usuario WHERE email= ? AND password= ?;");
+			$identificadoUsuario = false;
+
+			$consulta = $this -> conexion -> prepare("SELECT * FROM usuario WHERE email= ? AND password= ?;");
 			$consulta->bind_param("ss",$usuario->email,$usuario->password);
 			$consulta->execute();
-			if($consulta->get_result()->num_rows){ 
-				$_SESSION['id_usuario']=$this->getIdUsuario($usuario->email);
-				return true;
+
+			if($consulta -> get_result() -> num_rows){ 
+				$_SESSION['id_usuario'] = $this -> getIdUsuario($usuario->email);
+
+				$identificadoUsuario = true;
 			}
-			else return false;
+
+			return $identificadoUsuario;
 		}
 
 		//Añade el gusto '$gusto' al usuario '$usuario'
