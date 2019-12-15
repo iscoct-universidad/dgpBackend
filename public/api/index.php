@@ -60,50 +60,37 @@ $app -> get('/api/[health]', function (Request $request, Response $response, $ar
     return $response;
 });
 
-$app -> get('/api/usuario/{id_usuario}', function (Request $request,Response $response, $args) {
-    $id_usuario = $args["id_usuario"];
-    $sessionUser = $_SESSION['id_usuario'];
-    $isAdmin = $conexion_bd -> comprobarRolAdministrador($sessionUser);
+$app->get('/api/usuarios', function (Request $request,Response $response, $args) {
+    $isSuperUser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
 
-    if (!is_null($id_usuario) && $isAdmin) {
-        $usuario = $conexion_bd -> getUsuario($id_usuario);
-    } else if(!is_null($sessionUser)) {
-        $usuario = $conexion_bd -> getUsuario($sessionUser);
+    if ($isSuperUser) {
+        $usuarios = $conexion_bd -> getUsuarios();
+
+        $response = setResponse($response, array("usuarios" => $usuarios), 200);
     } else {
-    	$usuario = 'No esta seteada la sesión';
+        $response = setResponse($response, array("description" => "No es administrador"), 400);
     }
 
-    $response = setResponse($response, array("usuario"=>$usuario), 200);
-    $response = setHeader($request, $response);
-
-    return $response;
-});
-
-
-
-$app->get('/api/usuarios',function (Request $request,Response $response, $args) {
-    $usuarios = $conexion_bd -> getUsuarios();
-
-    $response = setResponse($response,array("usuarios"=>$usuarios), 200);
     $response = setHeader($request, $response);
 
     return $response;
 });
 
 $app -> get('/api/usuario/{id}', function (Request $request, Response $response, $args) {
-	$isIdDefined = ! is_null($args['id']);
-	$isSuperuser = $conexion_bd -> comprobarRolAdministrador($_SESSION['id_usuario']);
+    $isIdDefined = !is_null($args['id']);
+    $sessionUser = $_SESSION['id_usuario'];
+	$isSuperuser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
 
 	if ($isIdDefined && $isSuperuser) {
         $usuario = $conexion_bd -> getUsuario($args['id']);
         $code = 200;
-	} else if (! $isSuperuser) {
-		$usuario = 'You are not superuser in this system';
-		$code = 403;
+	} else if (!$isIdDefined && !is_null($sessionUser)) {
+		$usuario = $conexion_bd -> getUsuario($sessionUser);
+		$code = 200;
 	} else {
-		$usuario = 'Id is not set';
-		$code = 400;
-	}
+        $description = "Ha definido un argumento y no es administrador";
+        $code = 400;
+    }
 	
 	$response = setResponse($response, array("usuario" => $usuario), $code);
     $response = setHeader($request, $response);
@@ -112,32 +99,42 @@ $app -> get('/api/usuario/{id}', function (Request $request, Response $response,
 });
 
 $app -> get('/api/usuarioNombre/{id}', function (Request $request, Response $response, $args) {
-    $usuario=$conexion_bd->getUsuarioNombre($args['id']);
+    $isSuperuser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
+
+    if ($isSuperUser) {
+        $usuario=$conexion_bd->getUsuarioNombre($args['id']);
 	
-	$response = setResponse($response, array("usuario" => $usuario), 200);
+        $response = setResponse($response, array("usuario" => $usuario), 200);
+    } else {
+        $response = setResponse($response, array("description" => "No es administrador"), 400);
+    }
+
     $response = setHeader($request, $response);
 
 	return $response;
 });
 
-$app -> post('/api/usuario', function (Request $request,Response $response, $args) {
+$app -> post('/api/login', function (Request $request, Response $response, $args) {
     $comparison = hasBodyJson($request);
+
     if ($comparison) {
         $response = setResponse($response, array('description' =>'El cuerpo no contiene json'), 400);
-    } 
-    else {
-        $user = new Usuario;
-        $post = $request->getBody();
-        $post=json_decode($post,true);
+    } else {
+        $user = new Usuario();
+    
+        $post = $request -> getBody();
+        $post = json_decode($post,true);
+
         $user -> email = $post['email'];
         $user -> password = $post['password'];
-        $usuario = $conexion_bd -> identificarUsuario($user);
+
+        $existeUsuarioEnBD = $conexion_bd -> identificarUsuario($user);
     
-        if ($usuario!=false){
+        if ($existeUsuarioEnBD){
             $response = setResponse($response, array('id_usuario' => $_SESSION['id_usuario'],'description' => 'OK'), 200);
-        }
-        else
+        } else {
             $response = setResponse($response, array('description' => 'No pudo identificarse al usuario'), 400);
+        }
     }
 
     return setHeader($request, $response);
@@ -161,16 +158,20 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
 
     $post=$request->getParsedBody();
     $new_gustos = array();
+
 	if (array_key_exists('gustos', $post)) {
-        $gustos_post = json_decode($post['gustos'],true);
-		for ($i=0;$i<count($gustos_post['gustos']);$i++) {
-		    $new_gustos[]=$gustos_post['gustos'][$i];
+        $gustos_post = json_decode($post['gustos'], true);
+
+		for ($i=0; $i < count($gustos_post['gustos']); $i++) {
+		    $new_gustos[$i]=$gustos_post['gustos'][$i];
 		}
     }
-    $new_user= new Usuario;
+
+    $new_user = new Usuario();
     $new_user -> constructFromArguments($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
                              $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
     $exito = $conexion_bd->regUsuario($new_user);
+
     if ($exito) {
         $response = setResponse($response, array('description'=> 'OK'), 200);
     } else {
