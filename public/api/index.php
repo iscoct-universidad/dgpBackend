@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../php/mensajeChat.php';
 
 $container = new Container();
 $container->set('upload_directory',__DIR__ . '/../images');
-$container['db'] = new gestorDB();
+$container['db'] = new gestorBD();
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
