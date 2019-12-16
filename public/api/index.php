@@ -61,9 +61,9 @@ $app -> get('/api/[health]', function (Request $request, Response $response, $ar
     return $response;
 });
 
-$app->get('/api/usuarios', function (Request $request,Response $response, $args) {
+$app->get('/api/usuarios', function (Request $request, Response $response, $args) {
     $conexion_bd = $this -> get('db');
-    $isSuperUser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
+    $isSuperUser = $conexion_bd -> comprobarRolAdministrador($_SESSION['id_usuario']);
 
     if ($isSuperUser) {
         $usuarios = $conexion_bd -> getUsuarios();
