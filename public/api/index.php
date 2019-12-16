@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../php/mensajeChat.php';
 
 $container = new Container();
 $container->set('upload_directory',__DIR__ . '/../images');
+$container['db'] = new gestorDB();
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
@@ -61,6 +62,7 @@ $app -> get('/api/[health]', function (Request $request, Response $response, $ar
 });
 
 $app->get('/api/usuarios', function (Request $request,Response $response, $args) {
+    $conexion_bd = $app -> getContainer()['db'];
     $isSuperUser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
 
     if ($isSuperUser) {
@@ -79,6 +81,7 @@ $app->get('/api/usuarios', function (Request $request,Response $response, $args)
 $app -> get('/api/usuario/{id}', function (Request $request, Response $response, $args) {
     $isIdDefined = !is_null($args['id']);
     $sessionUser = $_SESSION['id_usuario'];
+    $conexion_bd = $app -> getContainer()['db'];
 	$isSuperuser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
 
 	if ($isIdDefined && $isSuperuser) {
@@ -99,6 +102,7 @@ $app -> get('/api/usuario/{id}', function (Request $request, Response $response,
 });
 
 $app -> get('/api/usuarioNombre/{id}', function (Request $request, Response $response, $args) {
+    $conexion_bd = $app -> getContainer()['db'];
     $isSuperuser = $conexion_bd -> comprobarRolAdministrador($sessionUser);
 
     if ($isSuperUser) {
@@ -128,6 +132,7 @@ $app -> post('/api/login', function (Request $request, Response $response, $args
         $user -> email = $post['email'];
         $user -> password = $post['password'];
 
+        $conexion_bd = $app -> getContainer()['db'];
         $existeUsuarioEnBD = $conexion_bd -> identificarUsuario($user);
     
         if ($existeUsuarioEnBD){
@@ -147,7 +152,7 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
 		$imageFile = $uploadFiles['imagen'];
 
 		if ($imageFile->getError() === UPLOAD_ERR_OK){
-		    $imagePath =moveUploadFile($this->get('upload_directory'),$imageFile);
+		    $imagePath = moveUploadFile($this->get('upload_directory'),$imageFile);
 		}
 		else{
 		    $imagePath = '';
@@ -170,6 +175,7 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
     $new_user = new Usuario();
     $new_user -> constructFromArguments($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
                              $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
+    $conexion_bd = $app -> getContainer()['db'];
     $exito = $conexion_bd->regUsuario($new_user);
 
     if ($exito) {
@@ -212,6 +218,7 @@ $app -> post('/api/usuario/modificar', function (Request $request, Response $res
                              $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
         $new_user -> id=$_SESSION['id_usuario'];
 
+        $conexion_bd = $app -> getContainer()['db'];
         $exito = $conexion_bd->updateUsuario($new_user);
 
         if ($exito) {
@@ -226,6 +233,7 @@ $app -> post('/api/usuario/modificar', function (Request $request, Response $res
 $app -> delete('/api/usuario/{id}', function (Request $request, Response $response, $args) {
     $usuario = new Usuario;
     $usuario->id = $args['id'];
+    $conexion_bd = $app -> getContainer()['db'];
     $exito = $conexion_bd -> deleteUsuario($usuario);
 
     if ($exito) {
@@ -238,6 +246,7 @@ $app -> delete('/api/usuario/{id}', function (Request $request, Response $respon
 });
 
 $app -> get('/api/actividades', function (Request $request, Response $response, $args) {
+    $conexion_bd = $app -> getContainer()['db'];
     $actividades = $conexion_bd->getActividades();
 
     $response = setResponse($response,array("actividades"=>$actividades), 200);
@@ -247,6 +256,7 @@ $app -> get('/api/actividades', function (Request $request, Response $response, 
 });
 
 $app -> get('/api/actividades/terminadas', function (Request $request, Response $response, $args) {
+    $conexion_bd = $app -> getContainer()['db'];
     $actividades=$conexion_bd->getActividadesTerminadas();
 
     $response = setResponse($response,array("actividades"=>$actividades), 200);
@@ -256,6 +266,7 @@ $app -> get('/api/actividades/terminadas', function (Request $request, Response 
 });
 
 $app -> get('/api/actividades/propias', function (Request $request, Response $response, $args) {
+    $conexion_bd = $app -> getContainer()['db'];
     $actividades = $conexion_bd->getActividadesPropias();
 
     $response = setResponse($response,array("actividades"=>$actividades), 200);
@@ -265,6 +276,7 @@ $app -> get('/api/actividades/propias', function (Request $request, Response $re
 });
 
 $app -> get('/api/actividades/usuario/{id}', function (Request $request, Response $response, $args) {
+    $conexion_bd = $app -> getContainer()['db'];
     $actividades=$conexion_bd->getActividadesUsuario($args['id']);
 
     $response = setResponse($response,array("actividades"=>$actividades), 200);
@@ -276,6 +288,7 @@ $app -> get('/api/actividades/usuario/{id}', function (Request $request, Respons
 $app-> get('/api/actividades/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $actividad->id_actividad=$args['id'];
+    $conexion_bd = $app -> getContainer()['db'];
     $actividad=$conexion_bd->getActividad($actividad);
     $response = setResponse($response,array('actividad'=>$actividad), 200);
     $response = setHeader($request, $response);
@@ -286,6 +299,7 @@ $app-> get('/api/actividades/{id}', function (Request $request, Response $respon
 $app -> put('/api/actividades/apuntarse/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $actividad->id_actividad=$args['id'];
+    $conexion_bd = $app -> getContainer()['db'];
     $exito=$conexion_bd->apuntarseActividad($actividad);
 
     if ($exito)
@@ -332,7 +346,8 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
                 $new_etiquetas[]=$etiquetas_post['etiquetas'][$i];
             }
         }
-		$actividad->etiquetas=$new_etiquetas;
+        $actividad->etiquetas=$new_etiquetas;
+        $conexion_bd = $app -> getContainer()['db'];
 		$exito=$conexion_bd->regActividad($actividad);
 		if ($exito) $response = setResponse($response, array('description'=>'OK'), 200);
 		else $response = setResponse($response, array('description'=>'No ha sido posible crear la actividad'), 400);
@@ -342,6 +357,7 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
 $app->get('/api/actividades/chat/{id}', function (Request $request, Response $response, $args) {
     $actividad = new Actividad;
     $actividad->id_actividad=$args['id'];
+    $conexion_bd = $app -> getContainer()['db'];
     $actividad = $conexion_bd->getChat($actividad);
 
     $response = setResponse($response,array('chat'=>$actividad->mensajes_chat),200);
@@ -362,6 +378,7 @@ $app->post('/api/actividades/chat/{id}', function (Request $request, Response $r
         $mensajeChat->id_actividad=$args['id'];
         $mensajeChat->contenido=$post['contenido'];
 
+        $conexion_bd = $app -> getContainer()['db'];
         $exito=$conexion_bd->publicarMensaje($mensajeChat);
     
         if ($exito) {
@@ -389,6 +406,7 @@ $app -> put('/api/actividades/cerrar/{id}', function (Request $request, Response
         $actividad->fecha=$put['fecha'];
         if (empty($put['localizacion']) || $put['localizacion']=='') $put['localizacion']=null;
         $actividad->localizacion=$put['localizacion'];
+        $conexion_bd = $app -> getContainer()['db'];
         $exito=$conexion_bd->cerrarActividad($actividad);
 
         if ($exito) {
@@ -413,6 +431,7 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
         $actividad->id_actividad=$args['id'];
         $puntuacion=$put['puntuacion'];
         $texto_valoracion=$put['texto_valoracion'];
+        $conexion_bd = $app -> getContainer()['db'];
         $exito = $conexion_bd->valorar($actividad,$puntuacion,$texto_valoracion);
         if ($exito){
             $response = setResponse($response,array( 'description'=>'OK'), 200);
@@ -427,6 +446,7 @@ $app -> put('/api/actividades/valorar/{id}', function (Request $request, Respons
 
 $app -> get('/api/buscarUsuario/{keywords}', function (Request $request, Response $response, $args) {
     $keywords = $args['keywords'];
+    $conexion_bd = $app -> getContainer()['db'];
     $listaUsuarios = $conexion_bd->buscarUsuarios($keywords);
     $response = setResponse($response,array('usuarios'=>$listaUsuarios),200);
     return setHeader($request, $response);
