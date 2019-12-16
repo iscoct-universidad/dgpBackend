@@ -78,7 +78,7 @@ $app->get('/api/usuarios', function (Request $request,Response $response, $args)
     return $response;
 });
 
-$app -> get('/api/usuario/{id}', function (Request $request, Response $response, $args) {
+$app -> get('/api/usuario/[{id}]', function (Request $request, Response $response, $args) {
     $isIdDefined = !is_null($args['id']);
     $sessionUser = $_SESSION['id_usuario'];
     $conexion_bd = $this -> get('db');
