@@ -293,73 +293,6 @@
 			}
 		}
 
-		/*
-		//ProponerFechaHora
-		public function proponerFechaLocalizacion($actividad){
-			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
-			$consulta->bind_param("i",$_SESSION['id_usuario']);
-			$consulta->execute();
-			$fila_resultado = $consulta->get_result()->fetch_assoc();
-			if ($fila_resultado['rol']=='socio'){
-				$actividad->id_socio=$_SESSION['id_usuario'];
-				$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=?, localizacion=?, id_usuario_propone=? WHERE id_actividad=? AND id_socio=?;");
-				$consulta->bind_param("ssiii",$actividad->fecha,$actividad->localizacion,$_SESSION['id_usuario'],$actividad->id_actividad,$actividad->id_socio);
-				$consulta->execute();
-				return ($consulta->affected_rows==1);
-			}
-			else{
-				$actividad->id_voluntario=$_SESSION['id_usuario'];
-				$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=?, localizacion=?,id_usuario_propone=? WHERE id_actividad=? AND id_voluntario=?;");
-				$consulta->bind_param("ssiii",$actividad->fecha,$actividad->localizacion,$_SESSION['id_usuario'],$actividad->id_actividad,$actividad->id_voluntario);
-				$consulta->execute();
-				return ($consulta->affected_rows==1);
-			}	
-		}
-		//Confirmar fecha y localizacion
-		public function confirmarFechaLocalizacion($actividad){
-
-			$consultaComprobacion = $this->conexion->prepare("SELECT id_usuario_propone FROM actividad WHERE id_actividad=?;");
-			$consultaComprobacion->bind_param("i",$actividad->id_actividad);
-			$consultaComprobacion->execute(); 
-			$fila_resultadoComprobacion = $consultaComprobacion->get_result()->fetch_assoc();
-			$id_usuario_propone = $fila_resultadoComprobacion['id_usuario_propone'];
-			if ($id_usuario_propone==$_SESSION['id_usuario']) return false;
-
-			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
-			$consulta->bind_param("i",$_SESSION['id_usuario']);
-			$consulta->execute();
-			$fila_resultado = $consulta->get_result()->fetch_assoc();
-			if ($fila_resultado['rol']=='socio'){
-				$actividad->id_socio=$_SESSION['id_usuario'];
-				if ($actividad->cerrada){
-					$consulta=$this->conexion->prepare("UPDATE actividad SET cerrada=? WHERE id_actividad=? AND id_socio=?;");
-					$consulta->bind_param("iii",$actividad->cerrada,$actividad->id_actividad,$actividad->id_socio);
-					$consulta->execute();
-				}
-				else{
-					$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=NULL, localizacion=NULL, id_usuario_propone=NULL WHERE id_actividad=? AND id_socio=?;");
-					$consulta->bind_param("ii",$actividad->id_actividad,$actividad->id_socio);
-					$consulta->execute();
-				}
-				return ($consulta->affected_rows==1);
-			}
-			else{
-				$actividad->id_voluntario=$_SESSION['id_usuario'];
-				if ($actividad->cerrada){
-					$consulta=$this->conexion->prepare("UPDATE actividad SET cerrada=? WHERE id_actividad=? AND id_voluntario=?;");
-					$consulta->bind_param("iii",$actividad->cerrada,$actividad->id_actividad,$actividad->id_voluntario);
-					$consulta->execute();
-				}
-				else{
-					$consulta=$this->conexion->prepare("UPDATE actividad SET fecha=NULL,localizacion=NULL WHERE id_actividad=? AND id_voluntario=?;");
-					$consulta->bind_param("ii",$actividad->id_actividad,$actividad->id_voluntario);
-					$consulta->execute();
-				}
-				return ($consulta->affected_rows==1);
-			}	
-		}
-		*/
-
 		public function valorar($actividad,$puntuacion,$texto_valoracion){
 			$consulta=$this->conexion->prepare("SELECT rol FROM usuario WHERE id=?");
 			$consulta->bind_param("i",$_SESSION['id_usuario']);
@@ -396,22 +329,6 @@
 			return ($consulta->affected_rows==1);
 		}
 
-		/*
-		//Borra la actividad "$actividad", buscándola por su id
-		public function deleteActividad($actividad){
-			$comprobar="SELECT * FROM actividad WHERE id_actividad=" . $actividad->id_actividad;
-			$resultado=mysqli_query($this->conexion, $comprobar);
-			if(mysqli_num_rows($resultado)<=0){
-				echo "Error al borrar: La actividad no existe.";
-				exit();
-			}
-			else{
-				$envio = "DELETE FROM actividad WHERE id_actividad=" . $actividad->id_actividad;
-				mysqli_query($this->conexion, $envio);
-			}
-		}
-		*/
-
 		//Borrar todos los gustos de un usuario.
 		public function deleteAllGustos($id_usuario){
 			$consulta=$this->conexion->prepare("DELETE FROM gustos WHERE id_usuario=?;");
@@ -421,8 +338,8 @@
 
 		//Borra todas las actividades del usuario.
 		public function deleteAllActividades($id_usuario){
-			$consulta=$this->conexion->prepare("DELETE FROM actividad WHERE id_voluntario=? or id_socio=?;");
-			$consulta->bind_param("ii",$id_usuario,$id_usuario);
+			$consulta=$this->conexion->prepare("DELETE FROM actividad WHERE id_creador=?;");
+			$consulta->bind_param("i",$id_usuario);
 			$consulta->execute();
 		}
 
@@ -902,22 +819,5 @@
 				return false;
 			}
 		}
-
-		/*
-		//Borra el gusto "$gusto", buscándolo por la combinación de usuario y gusto
-		public function deleteGusto($gusto){
-			$comprobar="SELECT * FROM gustos WHERE id_usuario=" . $gusto->id_usuario . " AND gusto=" . $gusto->gusto;
-			$resultado=mysqli_query($this->conexion, $comprobar);
-			if(mysqli_num_rows($resultado)<=0){
-				echo "Error al borrar: No existe la combinación de gusto y usuario.";
-				exit();
-			}
-			else{
-				$envio = "DELETE FROM gustos WHERE id_usuario=" . $gusto->id_usuario . " AND gusto=" . $gusto->gusto;
-				mysqli_query($this->conexion, $envio);
-			}
-		}
-		*/
-
 	}
 ?>
