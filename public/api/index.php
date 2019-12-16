@@ -91,7 +91,7 @@ $app -> get('/api/usuario/[{id}]', function (Request $request, Response $respons
 		$usuario = $conexion_bd -> getUsuario($sessionUser);
 		$code = 200;
 	} else {
-        $description = "Ha definido un argumento y no es administrador";
+        $usuario = "Ha definido un argumento y no es administrador";
         $code = 400;
     }
 	
