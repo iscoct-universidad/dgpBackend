@@ -216,7 +216,7 @@ $app -> post('/api/usuario/modificar', function (Request $request, Response $res
         $new_user = new Usuario;
         $new_user -> constructFromArguments($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
                              $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
-        $new_user -> id=$_SESSION['id_usuario'];
+        $new_user -> id = $post['id_usuario'];
 
         $conexion_bd = $this -> get('db');
         $exito = $conexion_bd->updateUsuario($new_user);
@@ -342,6 +342,7 @@ $app -> post('/api/actividades', function (Request $request, Response $response,
         $new_etiquetas = array();
         if (array_key_exists('etiquetas', $post)) {
             $etiquetas_post = json_decode($post['etiquetas'],true);
+
             for ($i=0;$i<count($etiquetas_post['etiquetas']);$i++){
                 $new_etiquetas[]=$etiquetas_post['etiquetas'][$i];
             }
