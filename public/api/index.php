@@ -12,8 +12,8 @@ require_once __DIR__ . '/../../php/usuario.php';
 require_once __DIR__ . '/../../php/mensajeChat.php';
 
 $container = new Container();
-$container->set('upload_directory',__DIR__ . '/../images');
-$container['db'] = new gestorBD();
+$container -> set('upload_directory',__DIR__ . '/../images');
+$container -> set('db', new gestorBD());
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
