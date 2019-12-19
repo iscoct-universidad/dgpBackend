@@ -55,7 +55,7 @@ $app -> options('/[{path:.*}]', function (Request $request, Response $response, 
 $app->get('/api/[health]', function (Request $request, Response $response, $args) {
     $response -> getBody() -> write("El servidor está corriendo");
 
-    return setHeader($request, $response);
+    return $response;
 });
 
 $app->get('/api/usuario',function (Request $request,Response $response, $args) {
