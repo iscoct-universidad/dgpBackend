@@ -9,6 +9,7 @@
 			$user='dgp@practicasugr';
 			$pass='_PracticasUgr';
 			$DB='dgp_db';
+
 			$this->conexion = new mysqli ($host, $user, $pass, $DB);
 			$this->conexion->set_charset("utf8");
 			if ($this->conexion->connect_error){

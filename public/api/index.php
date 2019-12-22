@@ -177,40 +177,48 @@ $app -> post('/api/usuario/nuevo', function (Request $request, Response $respons
 
 $app -> post('/api/usuario/modificar', function (Request $request, Response $response, $args) {
         $conexion_bd= new gestorBD();
-        $uploadFiles = $request->getUploadedFiles();
-        if (count($uploadFiles) > 0) {
-            $imageFile = $uploadFiles['imagen'];
-    
-            if ($imageFile->getError() === UPLOAD_ERR_OK){
-                $imagePath =moveUploadFile($this->get('upload_directory'),$imageFile);
-            }
-            else{
-                $imagePath = '';
-            }
-        } else {
-            $imagePath = '';
-        }
 
         $post=$request->getParsedBody();
-        $new_gustos = array();
-        if (array_key_exists('gustos', $post)) {
-            $gustos_post = json_decode($post['gustos'],true);
-            for ($i=0;$i<count($gustos_post['gustos']);$i++) {
-                $new_gustos[]=$gustos_post['gustos'][$i];
+        $isSuperuser = $conexion_bd -> comprobarRolAdministrador($_SESSION['id_usuario']);
+        if ($isSuperuser OR $_SESSION['id_usuario']==$post['id_usuario']){
+            $uploadFiles = $request->getUploadedFiles();
+            if (count($uploadFiles) > 0) {
+                $imageFile = $uploadFiles['imagen'];
+        
+                if ($imageFile->getError() === UPLOAD_ERR_OK){
+                    $imagePath =moveUploadFile($this->get('upload_directory'),$imageFile);
+                }
+                else{
+                    $imagePath = '';
+                }
+            } else {
+                $imagePath = '';
             }
+
+
+            $new_gustos = array();
+            if (array_key_exists('gustos', $post)) {
+                $gustos_post = json_decode($post['gustos'],true);
+                for ($i=0;$i<count($gustos_post['gustos']);$i++) {
+                    $new_gustos[]=$gustos_post['gustos'][$i];
+                }
+            }
+
+            $new_user= new Usuario;
+            $new_user->construct2($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
+                                $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
+            $new_user->id=$post['id_usuario'];
+
+            $exito = $conexion_bd->updateUsuario($new_user);
+
+            if ($exito)
+                $response = setResponse($response,array('description'=> 'OK'), 200);
+            else
+                $response =setResponse($response,array('description'=> 'No tiene permiso para modificar el usuario, hay campos obligatorios vacíos o se incluyeron gustos repetidos.'), 400);
         }
-
-        $new_user= new Usuario;
-        $new_user->construct2($post['rol'],$post['nombre'], $post['apellido1'], $post['apellido2'], $post['DNI'], $post['fecha_nacimiento'], $post['localidad'],
-                             $post['email'], $post['telefono'], $post['aspiraciones'], $post['observaciones'],$post['password'],$imagePath,$new_gustos);
-        $new_user->id=$_SESSION['id_usuario'];
-
-        $exito = $conexion_bd->updateUsuario($new_user);
-
-        if ($exito)
-            $response = setResponse($response,array('description'=> 'OK'), 200);
-        else
+        else{
             $response =setResponse($response,array('description'=> 'No tiene permiso para modificar el usuario, hay campos obligatorios vacíos o se incluyeron gustos repetidos.'), 400);
+        }
         $conexion_bd->close();
 
     return setHeader($request, $response);
